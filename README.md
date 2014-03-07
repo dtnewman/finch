@@ -1,4 +1,4 @@
-athena
+<img src="https://github.com/dtnewman/athena/blob/master/Logo2.jpg?raw=true" alt="athena_logo">
 ====
 
 Daniel Newman - dnewman@fas.harvard.edu
