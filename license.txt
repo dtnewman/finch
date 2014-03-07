@@ -1,0 +1,5 @@
+This software is a package for stochastic optimization in the Go programming language.
+
+Copyright (c) 2014 Daniel Newman
+
+Email: dnewman@fas.harvard.edu or danielnewman@umich.edu
