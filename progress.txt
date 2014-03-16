@@ -3,3 +3,7 @@
 3/9 - modified repository... added logo
 
 3/11 - created sample go programs in repo
+
+3/15 - 3/16 Literature research
+
+
