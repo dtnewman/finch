@@ -9,3 +9,5 @@
 3/16 - starting work on hill climbing algorithm
 
 3/17 - researching in libraries and working on notes for stochastic gradient descent
+
+3/18 - fixing up notes and continue on hill climbing
