@@ -2,7 +2,7 @@
 package main
 
 import "fmt"
-import "math"
+//import "math"
 import "math/rand"
 import "time"
 
@@ -40,14 +40,14 @@ func get_neighbors(currentSolution []int)( [][]int) {
 }
 
 
-func hill_climb(currentSolution []int)(highest_score float64){
+func hill_climb(current_solution []int)([]int, float64){
     var score float64
-    highest_score = EvaluationFunc1(currentSolution)
+    highest_score := EvaluationFunc1(current_solution)
 	var highest_score_position int
 	
 	for {
 		highest_score_position = -1
-		neighbors := get_neighbors(currentSolution)
+		neighbors := get_neighbors(current_solution)
 	    for i ,value := range neighbors {
 	    	score = EvaluationFunc1(value)
 	    	if score > highest_score {
@@ -58,12 +58,12 @@ func hill_climb(currentSolution []int)(highest_score float64){
 	    if highest_score_position < 0 {
 	    	break
 	    } else {
-	    	copy(currentSolution,neighbors[highest_score_position])
+	    	copy(current_solution,neighbors[highest_score_position])
 	    }
 	    
 	}
-    fmt.Println(currentSolution, highest_score)
-	return highest_score
+    //fmt.Println(current_solution, highest_score)
+	return current_solution, highest_score
 }
 
 func random_int(min, max int) int {
@@ -81,37 +81,45 @@ func create_random_start()([] int) {
 }
 
 
-func hill_climb_go_routine(currentSolution [] int, ch chan<- float64) {
-	time.Sleep(time.Duration(currentSolution[0] * 1e9))
-	ch <- float64(currentSolution[0])
+func hill_climb_go_routine(current_solution [] int, ch1 chan<- []int, ch2 chan <- float64) {
+	best_solution, highest_score := hill_climb(current_solution)
+	ch1 <- best_solution
+	ch2 <- highest_score
 }
 
-func random_restart_hill_climb(num_restarts int)(highest_score float64) {
-	ch := make(chan float64)
+func random_restart_hill_climb(num_restarts int)([]int, float64) {
 	
+	var highest_score float64
+	ch1 := make(chan []int)
+	ch2 := make(chan float64)
+
 	for i := 0; i < num_restarts; i++ {
-		go hill_climb_go_routine(create_random_start(),ch)
+		go hill_climb_go_routine(create_random_start(),ch1, ch2)
 	}
 
 	var score float64;
+	var best_solution []int
 
 	for i := 0; i < num_restarts; i++ {
-        score = <-ch
+        best_solution = <-ch1
+        score = <-ch2
         if score > highest_score {
         	highest_score = score
         }
     }
-	return highest_score
+	return best_solution,highest_score
 }
 
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	var _ = math.Pi // delete
+	//var _ = math.Pi // delete
 	p := []int{2, 3, 5, 7, 1}
-	fmt.Println(p)
-    fmt.Println(hill_climb(p))
-    fmt.Println(create_random_start())
-    fmt.Println(random_restart_hill_climb(2))
+	fmt.Println("p",p)
+	best_solution, highest_score := hill_climb(p)
+    fmt.Println("hill climb results", best_solution, highest_score)
+    best_solution, highest_score = random_restart_hill_climb(2)
+    fmt.Println("random restart hill climb results", best_solution, highest_score)
+
 }
 
