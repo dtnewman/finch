@@ -13,3 +13,5 @@
 3/18 - fixing up notes and continue on hill climbing
 
 3/20 - more work on hill climbing and starting on random restart hill climbing
+
+3/21 - hill climbing
