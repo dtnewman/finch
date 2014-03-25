@@ -19,3 +19,5 @@
 3/22 and 3/23 - Learning some stuff about GO and working on hill climbing
 
 3/24 - Research on Beam Search. Added TSP example.
+
+3/25 - Added stochastic hill climbing

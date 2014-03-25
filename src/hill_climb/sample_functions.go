@@ -45,6 +45,7 @@ func simple_get_neighbors(currentSolution []int)([][]int) {
 	return neighbors
 }
 
+
 func simple_evaluation(a []int) (sum float64)  {
 	for i := 0; i < len(a); i++ {
 		sum += float64(a[i]*(i+1))
