@@ -1,8 +1,9 @@
 package main
 
 import "fmt"
-import "math/rand"
 import "time"
+import "math/rand"
+import "math"
 
 /*  A basic hill climbing algorithm that looks at neighbors and then
 *	goes to the neighbor at each step that most increases the objective
@@ -16,8 +17,11 @@ import "time"
 *	@return Returns a slice containing the best solution as well as a float64 with
 *	that solution's evaluated score
 */
-func hill_climb(current_solution []int, evaluate func([]int) float64, 
+func hill_climb(initial_solution []int, evaluate func([]int) float64, 
 				get_neighbors func([]int) [][]int) ([]int, float64){
+	current_solution := make([]int,len(initial_solution))
+	copy(current_solution,initial_solution)
+
     var score float64
     highest_score := evaluate(current_solution)
 	var highest_score_position int
@@ -57,8 +61,8 @@ func hill_climb_go_routine(current_solution [] int, evaluate func([]int) float64
 *	starting points
 */
 func random_restart_hill_climb(num_restarts int, evaluate func([]int) float64, create_random func() []int, get_neighbors func([]int) [][]int)([]int, float64) {
-	
 	var highest_score float64
+	highest_score = math.Inf(-1)
 	ch1 := make(chan []int)
 	ch2 := make(chan float64)
 
@@ -77,31 +81,34 @@ func random_restart_hill_climb(num_restarts int, evaluate func([]int) float64, c
         }
     }
 
-	return best_solution,highest_score
+	return best_solution, highest_score
 }
 
-/** return a random integer between min and max */
-func random_int(min, max int) int {
-    return rand.Intn(max - min) + min
-}
 
-/** return an array with 5 random integers between 1 and 10 */
-func create_random_start()([] int) {
-	size := 5
-	random_start := make([]int,size)
-	for i:=0; i < len(random_start); i++ {
-		random_start[i] = random_int(1,10)
-	}
-	return random_start
-}
+
+
+
 
 func main() {
 	rand.Seed(time.Now().Unix())
-	p := []int{2, 3, 5, 7, 1}
+	fmt.Println("\nRUN ON SIMPLE FUNCTION")
+	p := []int{2, 3, 5, 4, 1, 6}
 	fmt.Println("p",p)
 
-	best_solution, highest_score := hill_climb(p,evaluationFunc1,simple_get_neighbors)
+	best_solution, highest_score := hill_climb(p,simple_evaluation,simple_get_neighbors)
     fmt.Println("hill climb results", best_solution, highest_score)
-    best_solution, highest_score = random_restart_hill_climb(20000,evaluationFunc1,create_random_start,simple_get_neighbors)
-    fmt.Println("random restart hill climb results", best_solution, highest_score)
+    best_solution, highest_score = random_restart_hill_climb(1000,simple_evaluation,simple_create_random_start,simple_get_neighbors)
+    fmt.Println("random restart hill climb results", best_solution, highest_score, "\n")
+
+    fmt.Println("RUN ON TSP")
+    tsp_setup_data()
+    p2 := make([]int,len(g_data))
+    for i := 0; i < len(g_data); i++ {
+    	p2[i] = i
+    }
+    fmt.Println("Initial distance:", -tsp_evaluation(p2))
+    best_solution, highest_score = hill_climb(p2,tsp_evaluation,tsp_get_neighbors)
+    fmt.Println("Optimized distance (regular hill climb):", -highest_score)
+    best_solution, highest_score = random_restart_hill_climb(1000,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+    fmt.Println("Optimized distance (random restart hill climb):", -highest_score)
 }
