@@ -21,3 +21,5 @@
 3/24 - Research on Beam Search. Added TSP example.
 
 3/25 - Added stochastic hill climbing
+
+3/26 - Tweeked stochastic hill climbing, added a few more tests
