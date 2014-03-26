@@ -69,3 +69,36 @@ func Test_tsp_get_neighbors(t *testing.T) {
 		t.Errorf("simple_get_neighbors(%d) == %d, want %d", input, got, want)
 	}
 }
+
+
+/* Test the function hill_climb() to make sure that it evaluates to 60 for input
+	array {1,1,1} with the "simple" example functions passed in */ 
+func Test_hill_climb(t *testing.T) {
+	input := []int{1, 1, 1}
+	_, got := hill_climb(input,simple_evaluation,simple_get_neighbors)
+	want := 60.0
+	if (got != want) {
+		t.Errorf("hill_climb(%d,simple_evaluation,simple_get_neighbors) == %f, want %f", input, got, want)
+	}
+}
+
+/* Test the function stochastic_hill_climb() to make sure that it evaluates to 60 for input
+	array {1,1,1} with the "simple" example functions passed in */ 
+func Test_stochastic_hill_climb(t *testing.T) {
+	input := []int{1, 1, 1}
+	_, got := stochastic_hill_climb(input,simple_evaluation,simple_get_neighbors)
+	want := 60.0
+	if (got != want) {
+		t.Errorf("stochastic_hill_climb(%d,simple_evaluation,simple_get_neighbors) == %f, want %f", input, got, want)
+	}
+}
+
+/* Test the function random_restart_hill_climb() to make sure that it evaluates to 210 
+	with the "simple" example functions passed in */ 
+func Test_random_restart_hill_climb(t *testing.T) {
+	_, got := random_restart_hill_climb(1000,simple_evaluation,simple_create_random_start,simple_get_neighbors)
+	want := 210.0
+	if (got != want) {
+		t.Errorf("random_restart_hill_climb(10,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors) == %f, want %f", got, want)
+	}
+}

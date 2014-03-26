@@ -147,7 +147,7 @@ func stochastic_hill_climb(initial_solution []int, evaluate func([]int) float64,
 	return current_solution, evaluate(current_solution)
 }
 
-
+// NOTE: functions below that are not found above can be found in sample_functions.go
 func main() {
 	rand.Seed(time.Now().Unix())
 
