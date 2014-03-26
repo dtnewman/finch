@@ -113,9 +113,9 @@ func norm(x1 int, y1 int, x2 int, y2 int)(float64) {
 	return math.Sqrt(float64(x1-x2)*float64(x1-x2)+float64(y1-y2)*float64(y1-y2))
 }
 
-func tsp_evaluation(a []int) (sum float64)  {
-	for i:=0; i < len(a); i++ {
-		sum -= norm(g_data[a[i]][0],g_data[a[i]][1],g_data[a[(i+1)%len(a)]][0],g_data[a[(i+1)%len(a)]][1])
+func tsp_evaluation(path []int) (sum float64)  {
+	for i:=0; i < len(path); i++ {
+		sum -= norm(g_data[path[i]][0],g_data[path[i]][1],g_data[path[(i+1)%len(path)]][0],g_data[path[(i+1)%len(path)]][1])
 	}
 	return sum
 }
