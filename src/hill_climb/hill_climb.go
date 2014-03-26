@@ -177,5 +177,5 @@ func main() {
     best_solution, highest_score = random_restart_hill_climb(10,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
     fmt.Println("Optimized distance (random restart hill climb):", -highest_score)
     best_solution, highest_score = stochastic_hill_climb(p2,tsp_evaluation,tsp_get_neighbors)
-    fmt.Println("Optimized distance (regular hill climb):", -highest_score)
+    fmt.Println("Optimized distance (stochastic hill climb):", -highest_score)
 }
