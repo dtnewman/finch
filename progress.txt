@@ -23,3 +23,7 @@
 3/25 - Added stochastic hill climbing
 
 3/26 - Tweeked stochastic hill climbing, added a few more tests
+
+3/26 and 3/27 - Working on tweeking Go compiler to allow option to not throw error for unused variables
+
+3/27 - Modified compiler further so that it no longer throws errors for unused imports
