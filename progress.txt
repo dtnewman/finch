@@ -27,3 +27,5 @@
 3/26 and 3/27 - Working on tweeking Go compiler to allow option to not throw error for unused variables
 
 3/27 - Modified compiler further so that it no longer throws errors for unused imports
+
+3/31 - Added in beam search

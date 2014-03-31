@@ -48,14 +48,14 @@ func simple_get_neighbors(currentSolution []int)([][]int) {
 
 func simple_evaluation(a []int) (sum float64)  {
 	for i := 0; i < len(a); i++ {
-		sum += float64(a[i]*(i+1))
+		sum += float64(a[i])//*(i+1))
 	}
 	return sum
 }
 
 /** return an array with 5 random integers between 1 and 10 */
 func simple_create_random_start()([] int) {
-	size := 6
+	size := 3
 	random_start := make([]int,size)
 	for i:=0; i < len(random_start); i++ {
 		random_start[i] = random_int(1,10)
@@ -123,6 +123,5 @@ func tsp_evaluation(path []int) (sum float64)  {
 func tsp_create_random_start()([] int) {
 	size := len(g_data)
 	return rand.Perm(size)
-
 }
 
