@@ -29,3 +29,5 @@
 3/27 - Modified compiler further so that it no longer throws errors for unused imports
 
 3/31 - Added in beam search
+
+4/2 - Added in stochastic beam search
