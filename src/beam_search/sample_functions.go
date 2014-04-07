@@ -9,6 +9,9 @@ import (
     "strconv"
     "strings"
     "math"
+	"code.google.com/p/plotinum/plot"
+	"code.google.com/p/plotinum/plotter"
+	"code.google.com/p/plotinum/plotutil"
 )
 
 /** return a random integer between min and max */
@@ -125,3 +128,25 @@ func tsp_create_random_start()([] int) {
 	return rand.Perm(size)
 }
 
+// Takes in an array of which order to visit cities and plots the route. Assumes
+// that g_data global variable has already been initialized with tsp_setup_data
+// function.
+func plotTSP(city_order []int, file_name string) {
+	pts := make(plotter.XYs, len(city_order))
+	for i:=0; i < len(city_order); i++ {
+		pts[i].X = float64(g_data[city_order[i]][0])
+		pts[i].Y = float64(g_data[city_order[i]][1])
+	}	
+
+ 	p, _ := plot.New()
+ 	p.Title.Text = "TSP best solution"
+    p.X.Label.Text = "X"
+    p.Y.Label.Text = "Y"
+
+    plotutil.AddLinePoints(p,"", pts)
+    p.X.Min = 0
+    p.X.Max = 10000
+    p.Y.Min = 0
+    p.Y.Max = 10000
+    p.Save(4, 4, file_name)
+}

@@ -6,15 +6,14 @@ import "math/rand"
 import "math"
 
 
-
-
+// the recursive loop called by qsort_2d below
 func qsort_inner(a []float64,  b []int) ([]float64,[]int) {
 	if len(a) < 2 { return a,b }
 
 	left, right := 0, len(a) - 1
 
 	// Pick a pivot
-	pivotIndex := rand.Int() % len(a)
+	pivotIndex := rand.Int() % len(a) 
 
 	// Move the pivot to the right
 	a[pivotIndex], a[right] = a[right], a[pivotIndex]
@@ -166,7 +165,8 @@ func stochastic_beam_search(num_beams int, evaluate func([]int) float64,
 		fitnesses = qsort_2d(fitnesses,0)
 		
 		// Stop the loop if the highest fitness is not greater than max_fitness
-		if -fitnesses[0][0] <= max_fitness{
+		//fmt.Println(fitnesses[0][0])
+		if -fitnesses[0][0] < max_fitness{
 			break
 		} 
 
@@ -181,7 +181,7 @@ func stochastic_beam_search(num_beams int, evaluate func([]int) float64,
 			selection_probability[i] = cum_probability+float64(len(fitnesses[0])-i)/sum_fitnesses
 			cum_probability += float64(len(fitnesses[0])-i)/sum_fitnesses
 		}
-
+		cum_probability = math.Sqrt(cum_probability)
 		// Set max_fitness to (-1) times the first element in the first row of fitnesses
 		// since that indicates the leading value
 		max_fitness = -fitnesses[0][0]
@@ -205,21 +205,25 @@ func stochastic_beam_search(num_beams int, evaluate func([]int) float64,
 }
 
 
+
+
 // NOTE: functions below that are not found above can be found in sample_functions.go
 func main() {
 	rand.Seed(time.Now().Unix())
 	// run the problem on our "simple" function, where we try take an array of values and try to set them to
 	// values between 1 and 10, in order to maximize an objective function sum(x_i*i)
-	fmt.Println("\nRUN ON SIMPLE FUNCTION")
+	/*fmt.Println("\nRUN ON SIMPLE FUNCTION")
 	best_solution, highest_score := beam_search(5,simple_evaluation,simple_create_random_start,simple_get_neighbors)
 	fmt.Println("beam search results", best_solution, highest_score)
 	best_solution, highest_score = stochastic_beam_search(2,simple_evaluation,simple_create_random_start,simple_get_neighbors)
 	fmt.Println("stochastic beam search results", best_solution, highest_score)
-
+*/
 	fmt.Println("\nRUN ON TSP")
 	tsp_setup_data()
-	best_solution, highest_score = beam_search(10,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+	best_solution, highest_score := beam_search(30,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("beam search results", best_solution, -highest_score)
-	best_solution, highest_score = stochastic_beam_search(10,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+	best_solution, highest_score = stochastic_beam_search(30,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("stochastic beam search results", best_solution, -highest_score)
+
+	plotTSP(best_solution, "tsp_stochastic_beam_search.png")
 }
