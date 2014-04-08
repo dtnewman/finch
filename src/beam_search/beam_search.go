@@ -85,7 +85,6 @@ func beam_search(num_beams int, evaluate func([]int) float64,
 			neighbors = get_neighbors(population[i])
 			for _, value := range neighbors {
 				next_generation_candidates = append(next_generation_candidates, value)
-
 			}
 		}
 
@@ -106,6 +105,7 @@ func beam_search(num_beams int, evaluate func([]int) float64,
 		if -fitnesses[0][0] <= max_fitness{
 			break
 		} 
+
 		// Now fill up the next generation
 		for i := 0; i < num_beams; i++ {
 			copy(population[i],next_generation_candidates[int(fitnesses[1][i])])
@@ -123,15 +123,19 @@ func beam_search(num_beams int, evaluate func([]int) float64,
 // Then, at every step, it looks at the neighbors of all members of the population and then finds the top
 // neighbors to create a new population of size num_beams. This keeps going until the max score is no longer
 // improving at which point it stops and returns the best solution.
-func stochastic_beam_search(num_beams int, evaluate func([]int) float64, 
+func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, evaluate func([]int) float64, 
 				create_random func() []int, get_neighbors func([]int) [][]int)([]int, float64) { 
 	// decalre variables
 	var next_generation_candidates [][]int
 	var neighbors [][]int
-	var max_fitness float64 = math.Inf(-1)
+	var max_fitness float64 = math.Inf(-1) // will hold max fitness in each generation
+	var best_fitness_yet float64 = math.Inf(-1) // will hold highest fitness yet seen
 	var sum_fitnesses float64
 	var rand_float float64
 	var cum_probability float64
+	var num_iterations_no_improvement int = 0
+
+	best_candidate_yet := make([]int,0) // will hold solution with highest fitness yet seen
 
 	// create a population of num_beams random starting points 
 	population := make([][]int,0)
@@ -166,9 +170,14 @@ func stochastic_beam_search(num_beams int, evaluate func([]int) float64,
 		
 		// Stop the loop if the highest fitness is not greater than max_fitness
 		//fmt.Println(fitnesses[0][0])
-		if -fitnesses[0][0] < max_fitness{
+		if -fitnesses[0][0] <= best_fitness_yet {
+			num_iterations_no_improvement += 1
+		} else {
+			num_iterations_no_improvement = 0
+		}
+		if num_iterations_no_improvement >= max_iterations_no_improvement {
 			break
-		} 
+		}
 
 
 		// we're gonna pick based on order, with items first getting higher probability. First
@@ -186,6 +195,12 @@ func stochastic_beam_search(num_beams int, evaluate func([]int) float64,
 		// since that indicates the leading value
 		max_fitness = -fitnesses[0][0]
 
+		if max_fitness > best_fitness_yet {
+			best_fitness_yet = max_fitness
+			best_candidate_yet = make([]int,len(next_generation_candidates[int(fitnesses[1][0])]))
+			copy(best_candidate_yet,next_generation_candidates[int(fitnesses[1][0])])
+		}
+
 
 		// Now fill up the next generation based on probabilites that are determined from
 		// position
@@ -201,7 +216,7 @@ func stochastic_beam_search(num_beams int, evaluate func([]int) float64,
 		copy(population[0],next_generation_candidates[int(fitnesses[1][0])])
 	}
 
-	return population[0], max_fitness
+	return best_candidate_yet, best_fitness_yet
 }
 
 
@@ -222,8 +237,12 @@ func main() {
 	tsp_setup_data()
 	best_solution, highest_score := beam_search(30,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("beam search results", best_solution, -highest_score)
-	best_solution, highest_score = stochastic_beam_search(30,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+	plotTSP(best_solution, "tsp_beam_search.png")
+	best_solution, highest_score = stochastic_beam_search(2,100,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("stochastic beam search results", best_solution, -highest_score)
-
+	
+	
 	plotTSP(best_solution, "tsp_stochastic_beam_search.png")
+	best_solution = []int{1,2,3,4}
+	fmt.Println(tsp_get_neighbors(best_solution))
 }
