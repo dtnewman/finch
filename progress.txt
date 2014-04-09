@@ -31,3 +31,11 @@
 3/31 - Added in beam search
 
 4/2 - Added in stochastic beam search
+
+4/3 - Modified stochastic beam search based on Pavlos's suggestions. Also looked up information on convergence of stochastic gradient descent
+
+4/6 - Got plotinum working so that I can now plot the TSP solutions
+
+4/7 - started on tabu search
+
+4/8 - worked more on tabu search plus additional modifications of beam
