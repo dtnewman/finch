@@ -145,8 +145,8 @@ func plotTSP(city_order []int, file_name string) {
 
     plotutil.AddLinePoints(p,"", pts)
     p.X.Min = 0
-    p.X.Max = 10000
+    p.X.Max = 1800
     p.Y.Min = 0
-    p.Y.Max = 10000
+    p.Y.Max = 1300
     p.Save(4, 4, file_name)
 }

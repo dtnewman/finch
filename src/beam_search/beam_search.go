@@ -7,7 +7,7 @@ import "math"
 
 
 // the recursive loop called by qsort_2d below
-func qsort_inner(a []float64,  b []int) ([]float64,[]int) {
+func qsort_inner(a []float64,  b []int) ([]float64, []int) {
 	if len(a) < 2 { return a,b }
 
 	left, right := 0, len(a) - 1
@@ -38,18 +38,42 @@ func qsort_inner(a []float64,  b []int) ([]float64,[]int) {
 	return a,b
 }
 
+
+
 // takes in a 2d array and an index of the row to sort by
 // and returns a 2d array with all rows sorted by the 
 // index row. Assumes that the input array is square (nxn)
-func qsort_2d(a [][]float64, idx int) [][]float64 {
+func qsort_2d(a_input [][]float64, idx int, ascend_or_desc string) [][]float64 {
 	
+	// copy a_input into a
+	a := make([][]float64,len(a_input))
+
+	for i := range a {
+		a[i] = make([]float64, len(a_input[i]))
+		copy(a[i],a_input[i])
+	}
+
+	// throw error message if ascend_or_desc is not set right
+	// if ascend_or_desc = "descending", multiply every value in it
+	// by -1 and then sort that ascending
+	if ascend_or_desc == "ascending" {
+	} else if ascend_or_desc == "descending" {
+		for i:=0; i < len(a[idx]); i++ {
+			a[idx][i] *= -1
+		} 
+	} else {
+		fmt.Println("ERROR: ascend_or_desc in qsort_2d function must have value of 'ascending' or 'descending'")
+	}
+
 	b := make([]int, len(a[idx]))
 	for i:=0; i < len(a[idx]); i++ {
 		b[i] = i
 	}
 
+	// sort by the sorting row
 	_,order := qsort_inner(a[idx],b)
 
+	//sort all other rows
 	for i:=0; i < len(a); i++ {
 		if i != idx {
 			temp := make([]float64,len(a[i]))
@@ -58,6 +82,13 @@ func qsort_2d(a [][]float64, idx int) [][]float64 {
 				a[i][j] = temp[order[j]]
 			}
 		}
+	}
+
+	// revert a[idx] row back to original values
+	if ascend_or_desc == "descending" {
+		for i:=0; i < len(a[idx]); i++ {
+			a[idx][i] *= -1
+		} 
 	}
 	return a
 }
@@ -95,14 +126,14 @@ func beam_search(num_beams int, evaluate func([]int) float64,
 
 		for i, _ := range fitnesses[0] {
 			// negate the evaluations, so that it sorts from largest to smallest
-			fitnesses[0][i] = -evaluate(next_generation_candidates[i])
+			fitnesses[0][i] = evaluate(next_generation_candidates[i])
 			fitnesses[1][i] = float64(i)
 		}
 
 		// sort the fitness array by value in the first row, which holds fitness scores
-		fitnesses = qsort_2d(fitnesses,0)
+		fitnesses = qsort_2d(fitnesses,0, "descending")
 		// Stop the loop if the highest fitness is not greater than max_fitness
-		if -fitnesses[0][0] <= max_fitness{
+		if fitnesses[0][0] <= max_fitness{
 			break
 		} 
 
@@ -113,16 +144,18 @@ func beam_search(num_beams int, evaluate func([]int) float64,
 
 		// Set max_fitness to (-1) times the first element in the first row of fitnesses
 		// since that indicates the leading value
-		max_fitness = -fitnesses[0][0]
+		max_fitness = fitnesses[0][0]
 	}
 
 	return population[0], max_fitness
 }
 
-// This is my implementation of beam search. It generates a random starting population of size num_beams. 
+// This is my implementation of stochastic beam search. It generates a random starting population of size num_beams. 
 // Then, at every step, it looks at the neighbors of all members of the population and then finds the top
-// neighbors to create a new population of size num_beams. This keeps going until the max score is no longer
-// improving at which point it stops and returns the best solution.
+// neighbors to create a new population of size num_beams. It then selects a new population that is the size of num_beams
+// by selecting individuals with the highest fitness individuals more likely to be picked. This keeps going until the 
+// max score sees no improvement after max_iterations_no_improvement rounds at which point it stops and returns the
+// best solution.
 func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, evaluate func([]int) float64, 
 				create_random func() []int, get_neighbors func([]int) [][]int)([]int, float64) { 
 	// decalre variables
@@ -150,7 +183,6 @@ func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, ev
 			neighbors = get_neighbors(population[i])
 			for _, value := range neighbors {
 				next_generation_candidates = append(next_generation_candidates, value)
-
 			}
 		}
 
@@ -161,16 +193,16 @@ func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, ev
 
 		for i, _ := range fitnesses[0] {
 			// negate the evaluations, so that it sorts from largest to smallest
-			fitnesses[0][i] = -evaluate(next_generation_candidates[i])
+			fitnesses[0][i] = evaluate(next_generation_candidates[i])
 			fitnesses[1][i] = float64(i)
 		}
 
 		// sort the fitness array by value in the first row, which holds fitness scores
-		fitnesses = qsort_2d(fitnesses,0)
+		fitnesses = qsort_2d(fitnesses,0,"descending")
 		
 		// Stop the loop if the highest fitness is not greater than max_fitness
 		//fmt.Println(fitnesses[0][0])
-		if -fitnesses[0][0] <= best_fitness_yet {
+		if fitnesses[0][0] <= best_fitness_yet {
 			num_iterations_no_improvement += 1
 		} else {
 			num_iterations_no_improvement = 0
@@ -193,7 +225,7 @@ func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, ev
 		cum_probability = math.Sqrt(cum_probability)
 		// Set max_fitness to (-1) times the first element in the first row of fitnesses
 		// since that indicates the leading value
-		max_fitness = -fitnesses[0][0]
+		max_fitness = fitnesses[0][0]
 
 		if max_fitness > best_fitness_yet {
 			best_fitness_yet = max_fitness
@@ -235,14 +267,12 @@ func main() {
 */
 	fmt.Println("\nRUN ON TSP")
 	tsp_setup_data()
-	best_solution, highest_score := beam_search(30,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+	best_solution, highest_score := beam_search(50,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("beam search results", best_solution, -highest_score)
 	plotTSP(best_solution, "tsp_beam_search.png")
-	best_solution, highest_score = stochastic_beam_search(2,100,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+	best_solution, highest_score = stochastic_beam_search(30,100,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("stochastic beam search results", best_solution, -highest_score)
-	
-	
 	plotTSP(best_solution, "tsp_stochastic_beam_search.png")
-	best_solution = []int{1,2,3,4}
-	fmt.Println(tsp_get_neighbors(best_solution))
+
+
 }
