@@ -42,6 +42,7 @@ func hill_climb(initial_solution []int, evaluate func([]int) float64,
 	    } else {
 	    	copy(current_solution,neighbors[highest_score_position])
 	    }
+	    //fmt.Println(highest_score)
 	    
 	}
 	return current_solution, highest_score

@@ -123,6 +123,5 @@ func tsp_evaluation(path []int) (sum float64)  {
 func tsp_create_random_start()([] int) {
 	size := len(g_data)
 	return rand.Perm(size)
-
 }
 

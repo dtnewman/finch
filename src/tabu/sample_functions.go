@@ -125,3 +125,34 @@ func tsp_create_random_start()([] int) {
 	return rand.Perm(size)
 }
 
+/*  Hill climbing algorithm for comparison
+*/
+func hill_climb(initial_solution []int, evaluate func([]int) float64, 
+				get_neighbors func([]int) [][]int) ([]int, float64){
+	current_solution := make([]int,len(initial_solution))
+	copy(current_solution,initial_solution)
+
+    var score float64
+    highest_score := evaluate(current_solution)
+	var highest_score_position int
+	
+	for {
+		highest_score_position = -1
+		neighbors := get_neighbors(current_solution)
+	    for i ,value := range neighbors {
+	    	score = evaluate(value)
+	    	if score > highest_score {
+	    		highest_score = score
+	    		highest_score_position = i
+	    	}
+	    }
+	    if highest_score_position < 0 {
+	    	break
+	    } else {
+	    	copy(current_solution,neighbors[highest_score_position])
+	    }
+	    //fmt.Println(highest_score)
+	    
+	}
+	return current_solution, highest_score
+}

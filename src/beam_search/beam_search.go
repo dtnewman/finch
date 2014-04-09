@@ -125,7 +125,6 @@ func beam_search(num_beams int, evaluate func([]int) float64,
 		fitnesses = append(fitnesses,make([]float64,len(next_generation_candidates)))
 
 		for i, _ := range fitnesses[0] {
-			// negate the evaluations, so that it sorts from largest to smallest
 			fitnesses[0][i] = evaluate(next_generation_candidates[i])
 			fitnesses[1][i] = float64(i)
 		}
