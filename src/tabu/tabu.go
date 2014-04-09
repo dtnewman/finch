@@ -119,7 +119,7 @@ func inTabuList(candidate []int, tabuList [][]int) bool {
 }
 
 
-func tabu_search(initial_solution []int, evaluate func([]int) float64, 
+func tabu_search(initial_solution []int, max_num_neighbors int, tabu_list_max_size int, evaluate func([]int) float64, 
 				get_neighbors func([]int) [][]int) ([]int, float64){
 	current_solution := make([]int,len(initial_solution))
 	copy(current_solution,initial_solution)
@@ -130,9 +130,6 @@ func tabu_search(initial_solution []int, evaluate func([]int) float64,
 	best_candidate_yet := make([]int,0) // will hold solution with highest fitness yet seen
 	tabu_list := make([][]int,0)
 
-	
-	num_neighbors := 30
-	tabu_list_max_size := 20
 	num_iterations_no_improvement := 0
 	max_iterations_no_improvement := 100
 
@@ -155,8 +152,8 @@ func tabu_search(initial_solution []int, evaluate func([]int) float64,
 		// sort the fitness array by value in the first row, which holds fitness scores
 		fitnesses = qsort_2d(fitnesses,0, "descending")
 
-		fitnesses[0] = fitnesses[0][:num_neighbors]
-		fitnesses[1] = fitnesses[1][:num_neighbors]
+		fitnesses[0] = fitnesses[0][:max_num_neighbors]
+		fitnesses[1] = fitnesses[1][:max_num_neighbors]
 
 		max_fitness = fitnesses[0][0]
 		num_iterations_no_improvement += 1
@@ -177,7 +174,7 @@ func tabu_search(initial_solution []int, evaluate func([]int) float64,
 			next_candidate_idx += 1
 			// if next_candidate_idx == num_neighbors means that all of the neighbors
 			// are in the tabu list
-			if next_candidate_idx == num_neighbors {
+			if next_candidate_idx == max_num_neighbors {
 				fmt.Println("All candidates tabued, stuck on a local or global maximum")
 				return best_candidate_yet, best_fitness_yet
 			}
@@ -186,8 +183,8 @@ func tabu_search(initial_solution []int, evaluate func([]int) float64,
 
 		tabu_list = append(tabu_list, neighbors[int(fitnesses[1][next_candidate_idx])])
 		if len(tabu_list)>tabu_list_max_size {
+			tabu_list[0] = nil
 			tabu_list = tabu_list[1:]
-
 		}
 
 
@@ -202,12 +199,40 @@ func tabu_search(initial_solution []int, evaluate func([]int) float64,
 	return best_candidate_yet, best_fitness_yet
 }
 
+func tabu_search_go_routine(current_solution [] int, max_num_neighbors int, tabu_list_max_size int, evaluate func([]int) float64, get_neighbors func([]int) [][]int, ch1 chan<- []int, ch2 chan <- float64) {
+	best_solution, highest_score := tabu_search(current_solution, max_num_neighbors, tabu_list_max_size, evaluate, get_neighbors)
+	ch1 <- best_solution
+	ch2 <- highest_score
+}
 
+func random_restart_tabu_search(num_restarts int, max_num_neighbors int, tabu_list_max_size int,evaluate func([]int) float64, create_random func() []int, get_neighbors func([]int) [][]int)([]int, float64) {
+	var highest_score float64
+	highest_score = math.Inf(-1)
+	ch1 := make(chan []int)
+	ch2 := make(chan float64)
+
+	for i := 0; i < num_restarts; i++ {
+		go tabu_search_go_routine(create_random(),max_num_neighbors, tabu_list_max_size,evaluate, get_neighbors, ch1, ch2)
+	}
+
+	var score float64;
+	var best_solution []int
+
+	for i := 0; i < num_restarts; i++ {
+        best_solution = <-ch1
+        score = <-ch2
+        if score > highest_score {
+        	highest_score = score
+        }
+    }
+
+	return best_solution, highest_score
+}
 
 // NOTE: functions below that are not found above can be found in sample_functions.go
 func main() {
 	rand.Seed(time.Now().Unix())
-
+	rand.Seed(8)
 	// run the problem on our "simple" function, where we try take an array of values and try to set them to
 	// values between 1 and 10, in order to maximize an objective function sum(x_i*i)
 	//fmt.Println("\nRUN ON SIMPLE FUNCTION")
@@ -224,23 +249,28 @@ func main() {
     // Run on a travelling salesman problem with cities in the file tsp_data.csv (40 cities)
     fmt.Println("RUN ON TSP")
     tsp_setup_data()
-    p2 := make([]int,len(g_data))
-    for i := 0; i < len(g_data); i++ {
-    	p2[i] = i
-    }
-    for i := 0; i < 10; i++ {
-    	p2 = tsp_create_random_start()
-	    fmt.Println("Initial distance:", -tsp_evaluation(p2))
-	    best_solution, highest_score := hill_climb(p2,tsp_evaluation,tsp_get_neighbors)
-	    fmt.Println("Optimized distance (regular hill climb):", -highest_score)
-	    best_solution, highest_score = tabu_search(p2,tsp_evaluation,tsp_get_neighbors)
-	    fmt.Println("tabu search results", best_solution, -highest_score, "\n")
+
+    for i := 0; i < 3; i++ {
+    	p := tsp_create_random_start()
+	    fmt.Println("Initial distance:", -tsp_evaluation(p))
+	    _, highest_score := hill_climb(p,tsp_evaluation,tsp_get_neighbors)
+	    fmt.Println("regular hill climb:", -highest_score)
+	    _, highest_score = tabu_search(p,4,2,tsp_evaluation,tsp_get_neighbors)
+	    fmt.Println("tabu search, max_num_neighbors=4, tabu_list_max_size=2:", -highest_score, "")
+	    _, highest_score = tabu_search(p,40,20,tsp_evaluation,tsp_get_neighbors)
+	    fmt.Println("tabu search, max_num_neighbors=40, tabu_list_max_size=20:", -highest_score, "")
+	    _, highest_score = tabu_search(p,400,200,tsp_evaluation,tsp_get_neighbors)
+	    fmt.Println("tabu search, max_num_neighbors=400, tabu_list_max_size=200:", -highest_score, "\n")
     }
 
-    /*best_solution, highest_score = random_restart_hill_climb(10,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
-    fmt.Println("Optimized distance (random restart hill climb):", -highest_score)
-    best_solution, highest_score = stochastic_hill_climb(p2,tsp_evaluation,tsp_get_neighbors)
-    fmt.Println("Optimized distance (stochastic hill climb):", -highest_score)*/
+
+    best_solution, highest_score := random_restart_tabu_search(50,20,10,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+    fmt.Println("Optimized distance (random restart tabu search):", best_solution, -highest_score)
+
+    plotTSP(best_solution, "tabu_search.png")
+    
+    random_solution := tsp_create_random_start()
+    plotTSP(random_solution, "random_solution.png")
 
 
     /*
