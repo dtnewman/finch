@@ -233,18 +233,7 @@ func random_restart_tabu_search(num_restarts int, max_num_neighbors int, tabu_li
 func main() {
 	rand.Seed(time.Now().Unix())
 	rand.Seed(8)
-	// run the problem on our "simple" function, where we try take an array of values and try to set them to
-	// values between 1 and 10, in order to maximize an objective function sum(x_i*i)
-	//fmt.Println("\nRUN ON SIMPLE FUNCTION")
-	//p := []int{2, 3, 5, 4, 1, 6}
-	//fmt.Println("p",p)
 
-	//best_solution, highest_score := hill_climb(p,simple_evaluation,simple_get_neighbors)
-    //fmt.Println("hill climb results", best_solution, highest_score)
-    //best_solution, highest_score = random_restart_hill_climb(1000,simple_evaluation,simple_create_random_start,simple_get_neighbors)
-    //fmt.Println("random restart hill climb results", best_solution, highest_score)
-    //best_solution, highest_score = stochastic_hill_climb(p,simple_evaluation,simple_get_neighbors)
-    //fmt.Println("stochastic hill climb results", best_solution, highest_score, "\n")
 
     // Run on a travelling salesman problem with cities in the file tsp_data.csv (40 cities)
     fmt.Println("RUN ON TSP")
@@ -271,28 +260,5 @@ func main() {
     
     random_solution := tsp_create_random_start()
     plotTSP(random_solution, "random_solution.png")
-
-
-    /*
-    tabulist := make([][]int, 3)
-    tabulist[0] = make([]int, 3)
-    tabulist[1] = make([]int, 3)
-    tabulist[2] = make([]int, 3)
-    tabulist[0][0] = 1
-    tabulist[0][1] = 1
-    tabulist[0][2] = 1
-    tabulist[1][0] = 2
-    tabulist[1][1] = 2
-    tabulist[1][2] = 2
-    tabulist[2][0] = 3
-    tabulist[2][1] = 3
-    tabulist[2][2] = 3
-
-    test := make([]int,3)
-    test[0] = 4
-    test[1] = 4
-    test[2] = 4
-    fmt.Println(inTabuList(test,tabulist))
-    */
 
 }
