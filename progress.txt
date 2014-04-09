@@ -39,3 +39,5 @@
 4/7 - started on tabu search
 
 4/8 - worked more on tabu search plus additional modifications of beam
+
+4/9 - cleaned up tabu
