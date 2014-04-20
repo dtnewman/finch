@@ -232,7 +232,6 @@ form {
 } 
 
 #main-content h1:before {
-  content: "/";
   color: #9ddcff;
   padding-right: 0.3em;
   margin-left: -0.9em;
@@ -246,7 +245,6 @@ form {
   color: #474747;
 } 
 #main-content h2:before {
-  content: "//";
   color: #9ddcff;
   padding-right: 0.3em;
   margin-left: -1.5em;
@@ -262,7 +260,6 @@ form {
 } 
  
 #main-content h3:before {
-  content: "///";
   color: #9ddcff;
   padding-right: 0.3em;
   margin-left: -2em;
@@ -276,7 +273,6 @@ form {
 } 
 
 h4:before {
-  content: "////";
   color: #9ddcff;
   padding-right: 0.3em;
   margin-left: -2.8em;
@@ -288,7 +284,6 @@ h4:before {
   color: #474747;
 } 
 h5:before {
-  content: "/////";
   color: #9ddcff;
   padding-right: 0.3em;
   margin-left: -3.2em;
