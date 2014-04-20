@@ -221,7 +221,8 @@ func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, ev
 			selection_probability[i] = cum_probability+float64(len(fitnesses[0])-i)/sum_fitnesses
 			cum_probability += float64(len(fitnesses[0])-i)/sum_fitnesses
 		}
-		cum_probability = math.Sqrt(cum_probability)
+		//cum_probability = math.Sqrt(cum_probability)
+		
 		// Set max_fitness to (-1) times the first element in the first row of fitnesses
 		// since that indicates the leading value
 		max_fitness = fitnesses[0][0]
@@ -269,7 +270,7 @@ func main() {
 	best_solution, highest_score := beam_search(50,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("beam search results", best_solution, -highest_score)
 	plotTSP(best_solution, "tsp_beam_search.png")
-	best_solution, highest_score = stochastic_beam_search(30,100,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
+	best_solution, highest_score = stochastic_beam_search(50,1000,tsp_evaluation,tsp_create_random_start,tsp_get_neighbors)
 	fmt.Println("stochastic beam search results", best_solution, -highest_score)
 	plotTSP(best_solution, "tsp_stochastic_beam_search.png")
 
