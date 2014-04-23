@@ -40,12 +40,12 @@
 <p>Below is pseudocode for the algorithm:</p>
 <pre><code>$ // Return a state that is a local maximum
 $ function <b>steepest_ascent_hill_climbing</b>(problem):
-$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> <-Initialize the problem with a starting state
-$ &nbsp;&nbsp;&nbsp;&nbsp;loop do
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> &#8592; Initialize the problem with a starting state
+$ &nbsp;&nbsp;&nbsp;&nbsp;<b>loop do</b>
 $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set <i>neighbor</i> to highest-valued successor of <i>current-state</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the value of <i>neighbor</i> <= the value of <i>current-state</i>:
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Terminate and return <i>current-state</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i><-<i>neighbor</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> the value of <i>neighbor</i> &#8804; the value of <i>current-state</i>:
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>return</b> <i>current-state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> &#8592; <i>neighbor</i>
 </code></pre>
 
 <p>The <i>finch</i> implementation of steepest-ascent hill climbing has the following signature:</p>

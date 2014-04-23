@@ -28,37 +28,75 @@
     <div id="content-wrapper">
       <div class="inner clearfix">
         <section id="main-content">
-          <h3>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Welcome to GitHub Pages.</h3>
+          <h1>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Tabu Search</h1>
 
-<p>This automatic page generator is the easiest way to create beautiful pages for all of your projects. Author your page content here using GitHub Flavored Markdown, select a template crafted by a designer, and publish. After your page is generated, you can check out the new branch:</p>
-
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<p>Tabu search is an extension of hill climbing where a list is kept of the <i>k</i> most recently visited states, so that these states cannot be revisited. The <i>k</i> most recent states are kept in an object called the <i>tabu list</i>, which is usually implemented as a FIFO queue, with a maximum of <i>k</i> values allowed to be stored in it at a time.</p>
+<p>At first, the search works identically to hill climb, in that it looks at all neighbors and takes the steepest ascent route. However, whereas hill climbing will automatically stop when it reaches a local maximum, tabu search will examine neighbors and attempt to try out any neighbors that are not on the tabu list, <i>even if that means taking a step towards a lower fitness function</i>. For this reason, the search must always keep track of the best state reached so far in addition to the tabu list.</p>
+<p>Below is pseudocode that describes the algorithm in more detail:</p>
+<pre><code>$ // Return a state that is a local maximum
+$ function <b>tabu_search</b>(<i>problem, max_tabu_list_size</i>):
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>tabu_list</i> &#8592 initialize to empty list
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> &#8592 random starting point
+$ &nbsp;&nbsp;&nbsp;&nbsp;<b>loop do</b>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>neighbors</i> &#8592; all successors of the <i>current-state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> fitness(max fitness state in <i>neighbors</i>) &ge; fitness(<i>best_solution</i>):
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>best_solution</i> &#8592; highest fitness state in <i>neighbors</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>k-best-neighbors</i> &#8592; <i>k</i> highest ranked states in <i>neighbors</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove any values of <i>k-best-neighbors</i> &isin; <i>tabu_list</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> len(<i>k-best-neighbors</i>) = 0:
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>return</b> <i>best_solution</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> &#8592 highest fitness value in <i>k-best-neighbors</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add <i>current-state</i> to <i>tabu_list</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> len(<i>tabu_list</i> > <i>max_tabu_list_size</i>):
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove oldest value from <i>tabu_list</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check stopping condition. If met, return <i>best_solution</i>
 </code></pre>
+<p>Because tabu search climbs first climbs too the local maximum before making use of it's tabu list, it is guaranteed to get to a solution <i>at least</i> as optimal as what hill climbing would get to from the same starting point. Of course, it requires more computation than a simple hill climbing algorithm, but tabu search performs significantly better in many search landscapes. For example, imagine that you are searching the landscape below, and you randomly start where the red arrow points:</p>
+<img src="./images/tabu_search_example.png" border="1">
+<p>If you were using hill climbing, the algorithm would continue to climb, but then stop at point 1. With a tabu search, as long as the "bump" at the local minimum at point 1 is within your threshold (i.e. you can get over it in few enough steps that the algorithm doesn't stop), then when it reaches point 1, it will try out the downhill step to the right (it will not return to the left, since it was recently there, so a leftward step would lead to a point in the tabu list), and then soon find the uphill path so that it could continue on towards 2. This is a simplified example, but nonetheless one that illustrates the power of tabu search. Note that the algorithm will still have trouble getting out of steep local maxima since we limit the number of iterations that it could go without making improvements, in order so that the algorithm runs in a reasonable amount of time.</p> 
 
-<p>If you're using the GitHub for Mac, simply sync your repository and you'll see the new branch.</p>
+<p>The <i>finch</i> implementation of tabu search has the following signature:</p>
+<pre><code>func tabu_search(initial_solution []int, max_num_neighbors int, 
+        tabu_list_max_size int, evaluate func([]int) float64, 
+        get_neighbors func([]int) [][]int)
+</code></pre>
+<p>The function takes in the following parameters:</p>
+<ul>
+  <li><b>initial_solution</b> - An int[] array with an initial solution to seed the algorithm with</li>
+  <li><b>max_num_neighbors</b> - The number of neighbors in the total list of neighbors generated at each step to consider. Larger values for this number might yield better results, but take up more processing time.</li>
+  <li><b>tabu_list_max_size</b> - The maximum number of states to store in the tabu list. Larger values will give better results, but at the expense of increased processing time and memory usage.</li>
+  <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
+  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+</ul>
+<p>The function returns two values:<p>
+<ul>
+  <li>The state at the local maximum (type []int)</li>
+  <li>The fitness score at the local maximum (type float64)</li>
+</ul>
 
-<h3>
-<a name="designer-templates" class="anchor" href="#designer-templates"><span class="octicon octicon-link"></span></a>Designer Templates</h3>
+<h2>Random-restart tabu search</h2>
+The <i>finch</i> library also contains an algorithm for random-restart tabu search, which is directly analogous to random-restart hill climbing. As with random-restart hill climbing, this algorithm generates <i>k</i> random start states and then runs tabu search on all of those. The function has the following signature:</p>
+<pre><code>func random_restart_tabu_search(num_restarts int, max_num_neighbors int, 
+        tabu_list_max_size int,evaluate func([]int) float64, 
+        create_random func() []int, get_neighbors func([]int) [][]int)
+</code></pre>
+<p>The function takes in the following parameters:</p>
+<ul>
+  <li><b>num_restarts</b> - The number of random restarts to run.</li>
+  <li><b>max_num_neighbors</b> - The number of neighbors in the total list of neighbors generated at each step to consider. Larger values for this number might yield better results, but take up more processing time.</li>
+  <li><b>tabu_list_max_size</b> - The maximum number of states to store in the tabu list. Larger values will give better results, but at the expense of increased processing time and memory usage.</li>
+  <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
+  <li><b>create_random</b> - A function that you must construct and pass in which takes no parameters and returns a 1-dimensional array of type int[] containing a random starting solution for your problem</li>
+  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+</ul>
+<p>The function returns two values:<p>
+<ul>
+  <li>The state at the local maximum (type []int)</li>
+  <li>The fitness score at the local maximum (type float64)</li>
+</ul>
 
-<p>We've crafted some handsome templates for you to use. Go ahead and continue to layouts to browse through them. You can easily go back to edit your page before publishing. After publishing your page, you can revisit the page generator and switch to another theme. Your Page content will be preserved if it remained markdown format.</p>
-
-<h3>
-<a name="rather-drive-stick" class="anchor" href="#rather-drive-stick"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
-
-<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
-
-<h3>
-<a name="authors-and-contributors" class="anchor" href="#authors-and-contributors"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
-
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
-
-<h3>
-<a name="support-or-contact" class="anchor" href="#support-or-contact"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
-
-<p>Having trouble with Pages? Check out the documentation at <a href="http://help.github.com/pages">http://help.github.com/pages</a> or contact <a href="mailto:support@github.com">support@github.com</a> and we’ll help you sort it out.</p>
+<p><a href="./index.html">Return to home page</a></p>
         </section>
 
         <aside id="sidebar">

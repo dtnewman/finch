@@ -35,14 +35,15 @@
 <p>Beam search allows us to start with a collection of <i>k</i> randomly generated states. We keep track of all <i>k</i> "beams" at each step. At every iteration, the algorithm generates a set of neighbors of all <i>k</i> states. Then, it selects the top <i>k</i> successors from the complete list of neighbors and repeats. In pseudocode:</p>
 <pre><code>$ // Return a state that is a local maximum
 $ function <b>beam_search</b>(problem):
-$ &nbsp;&nbsp;&nbsp;&nbsp;<i>k-current-states</i> <-Initialize the problem with <i>k</i> starting states
-$ &nbsp;&nbsp;&nbsp;&nbsp;<i>max_value</i> <- -infinity
-$ &nbsp;&nbsp;&nbsp;&nbsp;loop do
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>k-current-states</i> &#8592; Initialize the problem with <i>k</i> starting states
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>max_value</i> &#8592; -&infin;
+$ &nbsp;&nbsp;&nbsp;&nbsp;<b>loop do</b>
 $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;loop through each beam in <i>k-current-states</i>
 $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add all successors for each beam to <i>neighbors</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the maximum fitness value of the states in <i>neighbors</i> <= <i>max_value</i>:
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Terminate and return member of <i>k-current-states</i> with highest fitness
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>k-current-states</i> <- top <i>k</i> values in <i>neighbors</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b>(max fitness value of the states in <i>neighbors</i> &#8804; <i>max_value</i>):
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>return</b> member of <i>k-current-states</i> with highest fitness
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>k-current-states</i> &#8592; top <i>k</i> values in <i>neighbors</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>max_value</i> &#8592; fitness of top value in <i>neighbors</i>
 </code></pre>
 
 <p>Beam search can be easily confused with random-restart hill climbing. For example, how is beam search with 100 beams different from running hill-climbing with 100 random restarts? The difference is that for random-restart hill climbing, each run of the algorithm is completely independent of the other. For beam search, since the next generation is chosen from the pool of successors to all of the beams, the lowest ranked beams will quickly drop out of the pool. In some cases, this might actually be a bad thing. For a simple example, let's say that your search space looks like the diagram below and that you are using 3 beams, and they happened to fall out in the parts of the search space pointed to by the red arrows:</p>
