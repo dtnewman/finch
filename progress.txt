@@ -46,4 +46,6 @@
 
 4/20 - Documentation
 
-4/23 - Documentation
+4/22 - Documentation 
+
+4/23 - Documentation and fixing up go code formatting
