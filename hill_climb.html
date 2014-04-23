@@ -31,15 +31,73 @@
           <h1>
 <a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Hill climbing</h1>
 
-<p>Hill climbing is an iterative algorithm that typically starts with an arbitrary solution to a problem and then incrementally improves the initial solution by changing one element at a time. At each step, the algorithm's fitness function always goes up; if none of the neighboring solutions increase the fitness function, then the solution is at a local maximum and the algorithm terminates. This algorithm can also be terminated after a set amount of time or number of iterations, but in most cases, you would probably choose to let it run until it reaches a local maximum.</p>
+<p>Hill climbing is an iterative algorithm that typically starts with an arbitrary solution to a problem and then incrementally improves the initial solution by changing one element at a time. At each step, the algorithm's fitness function always goes up; if none of the neighboring solutions increase the fitness function, then the solution is at a local maximum and the algorithm terminates. This algorithm can also be terminated after a set amount of time or number of iterations, but in most cases, you would probably choose to let it run until it reaches a local maximum (as the <i>finch</i> implementation does).</p>
+<p>The algorithm does not maintain any sort of search tree, so it only needs to keep track of the state and the value of the objective function. It also does not look ahead beyond the current solution's immediate neighbors. Because the algorithm always moves to a good neighbor state without thinking ahead about what it will do next, it is considered a greedy algorithm.</p>
+<p>Hill climbing is a very simple algorithm and therefore runs very quickly. For this reason, it works well on all sorts of optimization problems.</p>
 
-<pre><code>$ cd your_repo_root/repo_name
-$ git fetch origin
-$ git checkout gh-pages
+<h2> Steepest-ascent hill climbing</h2>
+<p>Steepest-ascent hill climbing is the standard and most commonly used version of the algorithm. The basic approach is to start with a random state and then always move to the neighbor that increases the objective function the most.</p>
+<p>Below is pseudocode for the algorithm:</p>
+<pre><code>$ // Return a state that is a local minimum
+$ function <b>steepest_ascent_hill_climbing</b>(problem):
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> <-Initialize the problem with a starting state
+$ &nbsp;&nbsp;&nbsp;&nbsp;loop do
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set <i>neighbor</i> to highest-valued successor of <i>current-state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If the value of <i>neighbor</i> <= the value of <i>current-state</i>:
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Terminate and return <i>current-state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i><-<i>neighbor</i>
 </code></pre>
 
-<h2> Steepest ascent hill climbing</h2>
-<p> gsgdsgsd! </p>
+<p>The <i>finch</i> implementation of steepest-ascent hill climbing has the following signature:</p>
+<pre><code>func hill_climb(initial_solution []int, evaluate func([]int) float64, 
+        get_neighbors func([]int) [][]int) ([]int, float64)
+</code></pre>
+<p>The function takes in the following parameters:</p>
+<ul>
+  <li><b>initial_solution</b> - An int[] array with an initial solution to seed the algorithm with</li>
+  <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
+  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+</ul>
+<p>The function returns two values:<p>
+<ul>
+  <li>The state at the local maximum ([]int)</li>
+  <li>The fitness score at the local maximum (float64)</li>
+</ul>
+
+<h2>Random-restart hill climbing</h2>
+<p>The simple hill climbing algorithm above only starts with one starting state. For convex problems with only one local maximum, the algorithm will generally perform very well. However, many search spaces of real problems have, to quote Russell and Norvig's textbook on artificial intelligence, "a landscape that looks more like a widely scattered family of balding porcupines on a flat floor, with miniature porcupines living on the tip of each porcupine needle, <i>ad infinitum</i>." In that case, starting with just one starting point may lead the basic hill climbing algorithm to converge to a local maximum that is far lower than the global maximum. To alleviate this, we can try running the algorithm again-and-again with various random starting solutions and then taking the state that maximizes the fitness function the most from all of those runs. This is called <b>random-restart hill climbing</b>.</p>
+
+<p>The <i>finch</i> implementation of random-restart hill climbing allows you to pass in a function for creating starting points and then it runs the hill climbing algorithm on each of those. It takes advantage of Go's concurrency features so that each instance of the algorithm is run on a different <i>goroutine</i>. As such, if you run your program on multiple cores, it will speed up this algorithm significantly. Below is the function's signature:</p>
+<pre><code>func random_restart_hill_climb(num_restarts int, evaluate func([]int) float64, 
+        create_random func() []int, get_neighbors func([]int) [][]int)
+</code></pre>
+<p>The function takes in the following parameters:</p>
+<ul>
+  <li><b>num_restarts</b> - The number of restarts (i.e. the number of different random starting points to run hill-climbing on)</li>
+  <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
+  <li><b>create_random</b> - A function that you must construct and pass in which takes no parameters and returns a 1-dimensional array of type int[] containing a random starting solution for your problem</li>
+  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+</ul>
+<h2>Stochastic hill climbing</h2>
+<p>In some cases, taking the steepest route may not get you to the best solution. For example, imagine if your search space looks like the one in the figure below and your algorithm starts out where the arrow is:</p>
+<img src="./images/stochastic_hill_climbing_example.png" border="1">
+<p>If you were to use the steepest ascent approach, then the algorithm would always move to the right in this example, and so it would end up at the local minimum there. With stochastic hill climbing, we choose at random from the uphill moves, with the probability of selection varying according to the steepness of the uphill move. As such, the algorithm is more likely to move to the right in the example above, but at some of the time it would move to the left, leading you to the global maximum. This example is somewhat contrived to make it very simple, but for the search landscapes in some real world problems, the steepest ascent method might not work as well as this one.</p>
+<p>When assigning selection probabilities to the various uphill neighbors, the <i>finch</i> implementation of this algorithm looks at all neighbors that improve on the current solution and then assigns probability of selection proportional to the amount of improvement. For example, let's say there are three neighbors to the current solution that improve the current score by 1, 2 and 3 point respectively. The probability of moving to each respective neighbor would then be 1/6, 2/6 and 3/6.</p>
+<p>Below is the function's signature:</p>
+<pre><code>func stochastic_hill_climb(initial_solution []int, evaluate func([]int) float64, 
+        get_neighbors func([]int) [][]int) ([]int, float64)
+</code></pre>
+<p>The function takes in the following parameters:</p>
+<ul>
+  <li><b>initial_solution</b> - An int[] array with an initial solution to seed the algorithm with</li>
+  <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
+  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+</ul>
+<p>The function returns two values:<p>
+<ul>
+  <li>The state at the local maximum ([]int)</li>
+  <li>The fitness score at the local maximum (float64)</li>
+</ul>
 
         </section>
 
@@ -60,7 +118,7 @@ $ git checkout gh-pages
             Genetic algorithms
           </a>       
 
-          <p class="repo-owner"><a href="https://github.com/dtnewman/finch"></a> is maintained by <a href="https://github.com/dtnewman">dtnewman</a>.</p>
+          <p class="repo-owner"><a href="https://github.com/dtnewman/finch"></a>This website is maintained by <a href="https://github.com/dtnewman">dtnewman</a>.</p>
 
           <p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>
         </aside>
