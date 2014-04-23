@@ -38,7 +38,7 @@
 <h2> Steepest-ascent hill climbing</h2>
 <p>Steepest-ascent hill climbing is the standard and most commonly used version of the algorithm. The basic approach is to start with a random state and then always move to the neighbor that increases the objective function the most.</p>
 <p>Below is pseudocode for the algorithm:</p>
-<pre><code>$ // Return a state that is a local minimum
+<pre><code>$ // Return a state that is a local maximum
 $ function <b>steepest_ascent_hill_climbing</b>(problem):
 $ &nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> <-Initialize the problem with a starting state
 $ &nbsp;&nbsp;&nbsp;&nbsp;loop do
@@ -60,8 +60,8 @@ $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i><-<i>neigh
 </ul>
 <p>The function returns two values:<p>
 <ul>
-  <li>The state at the local maximum ([]int)</li>
-  <li>The fitness score at the local maximum (float64)</li>
+  <li>The state at the local maximum (type []int)</li>
+  <li>The fitness score at the local maximum (type float64)</li>
 </ul>
 
 <h2>Random-restart hill climbing</h2>
@@ -77,6 +77,11 @@ $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i><-<i>neigh
   <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
   <li><b>create_random</b> - A function that you must construct and pass in which takes no parameters and returns a 1-dimensional array of type int[] containing a random starting solution for your problem</li>
   <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+</ul>
+<p>The function returns two values:<p>
+<ul>
+  <li>The state at the local maximum (type []int)</li>
+  <li>The fitness score at the local maximum (type float64)</li>
 </ul>
 <h2>Stochastic hill climbing</h2>
 <p>In some cases, taking the steepest route may not get you to the best solution. For example, imagine if your search space looks like the one in the figure below and your algorithm starts out where the arrow is:</p>
@@ -95,8 +100,8 @@ $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i><-<i>neigh
 </ul>
 <p>The function returns two values:<p>
 <ul>
-  <li>The state at the local maximum ([]int)</li>
-  <li>The fitness score at the local maximum (float64)</li>
+  <li>The state at the local maximum (type []int)</li>
+  <li>The fitness score at the local maximum (type float64)</li>
 </ul>
 
         </section>
