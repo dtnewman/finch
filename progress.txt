@@ -49,3 +49,5 @@
 4/22 - Documentation 
 
 4/23 - Documentation and fixing up go code formatting
+
+4/24 - Fixed up a few typos on website
