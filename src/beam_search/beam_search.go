@@ -264,7 +264,7 @@ func main() {
 	best_solution, highest_score := beam_search(50, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
 	fmt.Println("beam search results", best_solution, -highest_score)
 	plotTSP(best_solution, "tsp_beam_search.png")
-	best_solution, highest_score = stochastic_beam_search(50, 1000, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
+	best_solution, highest_score = stochastic_beam_search(50, 200, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
 	fmt.Println("stochastic beam search results", best_solution, -highest_score)
 	plotTSP(best_solution, "tsp_stochastic_beam_search.png")
 

@@ -4,7 +4,10 @@ import "fmt"
 import "time"
 import "math/rand"
 import "math"
+import "strconv"
 
+// Uses the make_change function to make num_changes to the current solution and then returns the
+// solution with the random changes made
 func make_changes(current_solution []int, make_change func([]int) []int, num_changes int)([] int) {
 	new_solution := make([]int, len(current_solution))
 	copy(new_solution, current_solution)
@@ -31,6 +34,7 @@ func make_changes(current_solution []int, make_change func([]int) []int, num_cha
 func simulated_annealing(initial_solution []int, evaluate func([]int) float64, make_change func([]int) []int,
 						 init_temp float64, thermostat float64, itol int, reannealing int)([]int, float64) {
 
+	// setup all the necessary variables
 	current_solution := make([]int, len(initial_solution))
 	proposed_solution := make([]int, len(initial_solution))
 	return_solution := make([]int, len(initial_solution))
@@ -102,13 +106,29 @@ func main() {
 	fmt.Println("Simulated annealing results", best_solution, highest_score)
 	
 	// Run on a travelling salesman problem with cities in the file tsp_data.csv (40 cities)
-	/*fmt.Println("RUN ON TSP")
+	fmt.Println("RUN ON TSP")
 	tsp_setup_data()
 	p2 := make([]int, len(g_data))
 	for i := 0; i < len(g_data); i++ {
 		p2[i] = i
 	}
+
+	// setup SA parameters
+	init_temp := 16.0
+	thermostat := 0.9
+	iterations := 1000000
+	reannealing := 60
+
+	num_runs := 10
+
 	fmt.Println("Initial distance:", -tsp_evaluation(p2))
-	best_solution, highest_score = simulated_annealing(p2, tsp_evaluation)
-	fmt.Println("Simulated annealing results):", -highest_score)*/
+	total := 0.0;
+	for i:=0;i<num_runs;i++ {
+		p2 = tsp_create_random_start()
+		best_solution, highest_score = simulated_annealing(p2, tsp_evaluation,tsp_make_change,init_temp,thermostat,iterations,reannealing)
+		fmt.Println(-highest_score)
+		total += highest_score
+		plotTSP(best_solution, "tsp_SA"+strconv.Itoa(i)+".png")
+	}
+	fmt.Println("Average score:", -total/float64(num_runs))
 }

@@ -1,6 +1,9 @@
 package main
 
 import (
+	"code.google.com/p/plotinum/plot"
+	"code.google.com/p/plotinum/plotter"
+	"code.google.com/p/plotinum/plotutil"
 	"encoding/csv"
 	"fmt"
 	"io"
@@ -17,7 +20,7 @@ func random_int(min, max int) int {
 }
 
 
-/** Take in a solution and make one change to it */
+/** Take in a solution for the "simple" example and make one change to it */
 func simple_make_change(current_solution []int) []int {
 	minval := 1
 	maxval := 10
@@ -32,34 +35,8 @@ func simple_make_change(current_solution []int) []int {
 	return return_value
 }
 
-/** get all neighbors of a given solution. Neighbors in this function
-are defined as all values where just one integer in the array is
-incremented or decremented by 1, and only where integer values remain
-between 1 and 10 */
-func simple_get_neighbors(currentSolution []int) [][]int {
-	minval := 1
-	maxval := 10
-
-	neighbors := make([][]int, 0)
-	temp := make([]int, len(currentSolution))
-
-	for i, value := range currentSolution {
-		if value > minval {
-			copy(temp, currentSolution)
-			temp[i] = value - 1
-			neighbors = append(neighbors, make([]int, len(currentSolution)))
-			copy(neighbors[len(neighbors)-1], temp)
-		}
-		if value < maxval {
-			copy(temp, currentSolution)
-			temp[i] = value + 1
-			neighbors = append(neighbors, make([]int, len(currentSolution)))
-			copy(neighbors[len(neighbors)-1], temp)
-		}
-	}
-	return neighbors
-}
-
+/** evaluate a solution by adding together all elements in the array
+*	multiplied by those elements' positions */
 func simple_evaluation(a []int) (sum float64) {
 	for i := 0; i < len(a); i++ {
 		sum += float64(a[i] * (i + 1))
@@ -67,7 +44,7 @@ func simple_evaluation(a []int) (sum float64) {
 	return sum
 }
 
-/** return an array with 5 random integers between 1 and 10 */
+/** return an array with 6 random integers between 1 and 10 */
 func simple_create_random_start() []int {
 	size := 6
 	random_start := make([]int, size)
@@ -77,22 +54,18 @@ func simple_create_random_start() []int {
 	return random_start
 }
 
-func tsp_get_neighbors(currentSolution []int) [][]int {
-	neighbors := make([][]int, 0)
-	temp_neighbor := make([]int, len(currentSolution))
-	var temp_int int
+/** Take in a solution for the TSP example and make one change to it */
+func tsp_make_change(current_solution []int) []int {
+	length := len(current_solution)
+	return_value := make([]int, len(current_solution))
+	copy(return_value, current_solution)
+	random_int_1 := random_int(0,length-1)
+	random_int_2 := random_int(0,length-1)
+	temp := return_value[random_int_1]
+	return_value[random_int_1] = return_value[random_int_2]
+	return_value[random_int_2] = temp
 
-	for i := 0; i < len(currentSolution); i++ {
-		for j := i + 1; j < len(currentSolution); j++ {
-			copy(temp_neighbor, currentSolution)
-			temp_int = temp_neighbor[i]
-			temp_neighbor[i] = temp_neighbor[j]
-			temp_neighbor[j] = temp_int
-			neighbors = append(neighbors, make([]int, len(currentSolution)))
-			copy(neighbors[len(neighbors)-1], temp_neighbor)
-		}
-	}
-	return neighbors
+	return return_value
 }
 
 var g_data [][]int
@@ -136,4 +109,27 @@ func tsp_evaluation(path []int) (sum float64) {
 func tsp_create_random_start() []int {
 	size := len(g_data)
 	return rand.Perm(size)
+}
+
+// Takes in an array of which order to visit cities and plots the route. Assumes
+// that g_data global variable has already been initialized with tsp_setup_data
+// function.
+func plotTSP(city_order []int, file_name string) {
+	pts := make(plotter.XYs, len(city_order))
+	for i := 0; i < len(city_order); i++ {
+		pts[i].X = float64(g_data[city_order[i]][0])
+		pts[i].Y = float64(g_data[city_order[i]][1])
+	}
+
+	p, _ := plot.New()
+	p.Title.Text = "TSP best solution"
+	p.X.Label.Text = "X"
+	p.Y.Label.Text = "Y"
+
+	plotutil.AddLinePoints(p, "", pts)
+	p.X.Min = 0
+	p.X.Max = 1800
+	p.Y.Min = 0
+	p.Y.Max = 1300
+	p.Save(4, 4, file_name)
 }
