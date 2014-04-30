@@ -62,20 +62,22 @@ $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>temperature</i> &#8592 Upda
 $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check stopping condition. If met, return <i>best_state</i>
 </code></pre>
 
-<p>fdsfdsafds</p> 
+<p>Since at any stage, the simulated annealing algorithm only makes changes two a state, rather than searching and storing all of its neighbors, it is generally a very memory efficient algorithm (it only needs to keep track of the current state, the proposed next state and the best state reached so far).</p> 
 
-<p>The <i>finch</i> implementation of simulated has the following signature:</p>
-<pre><code>func tabu_search(initial_solution []int, max_num_neighbors int, 
-        tabu_list_max_size int, evaluate func([]int) float64, 
-        get_neighbors func([]int) [][]int)
+<p>The <i>finch</i> implementation of simulated annealing has the following signature:</p>
+<pre><code>simulated_annealing(initial_solution []int, evaluate func([]int) float64, 
+	make_change func([]int) []int, init_temp float64, thermostat float64, 
+	itol int, reannealing int)
 </code></pre>
 <p>The function takes in the following parameters:</p>
 <ul>
   <li><b>initial_solution</b> - An int[] array with an initial solution to seed the algorithm with</li>
-  <li><b>max_num_neighbors</b> - The number of neighbors in the total list of neighbors generated at each step to consider. Larger values for this number might yield better results, but take up more processing time.</li>
-  <li><b>tabu_list_max_size</b> - The maximum number of states to store in the tabu list. Larger values will give better results, but at the expense of increased processing time and memory usage.</li>
   <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
-  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
+  <li><b>make_change</b> - A function that takes in a solution of type int[] and makes one change to it, returning a new solution of type int[]</li>
+  <li><b>init_temp</b> - The starting temperature for the algorithm</li>  
+  <li><b>thermostat</b> - A number, generally between 0.85 and 0.99 that indicates how much the temperature should be adjusted when changes are made to the temperature</li>  
+  <li><b>itol</b> - The maximum iterations to do before stopping</li>  
+  <li><b>reannealing</b> - The number of accepted solutions before a temperature adjustement is made</li>  
 </ul>
 <p>The function returns two values:<p>
 <ul>
@@ -83,26 +85,7 @@ $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check stopping condition. If m
   <li>The fitness score at the local maximum (type float64)</li>
 </ul>
 
-<h2>Random-restart tabu search</h2>
-The <i>finch</i> library also contains an algorithm for random-restart tabu search, which is directly analogous to random-restart hill climbing. As with random-restart hill climbing, this algorithm generates <i>k</i> random start states and then runs tabu search on all of those. The function has the following signature:</p>
-<pre><code>func random_restart_tabu_search(num_restarts int, max_num_neighbors int, 
-        tabu_list_max_size int,evaluate func([]int) float64, 
-        create_random func() []int, get_neighbors func([]int) [][]int)
-</code></pre>
-<p>The function takes in the following parameters:</p>
-<ul>
-  <li><b>num_restarts</b> - The number of random restarts to run.</li>
-  <li><b>max_num_neighbors</b> - The number of neighbors in the total list of neighbors generated at each step to consider. Larger values for this number might yield better results, but take up more processing time.</li>
-  <li><b>tabu_list_max_size</b> - The maximum number of states to store in the tabu list. Larger values will give better results, but at the expense of increased processing time and memory usage.</li>
-  <li><b>evaluate</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a fitness score for the given solution of type float64</li>
-  <li><b>create_random</b> - A function that you must construct and pass in which takes no parameters and returns a 1-dimensional array of type int[] containing a random starting solution for your problem</li>
-  <li><b>get_neighbors</b> - A function that you must construct and pass in which takes a solution of type int[] as a parameter and returns a 2-dimensional array of type int[][] with all neighboring solutions</li>
-</ul>
-<p>The function returns two values:<p>
-<ul>
-  <li>The state at the local maximum (type []int)</li>
-  <li>The fitness score at the local maximum (type float64)</li>
-</ul>
+
 
 <p><a href="./index.html">Return to home page</a></p>
         </section>
