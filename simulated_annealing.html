@@ -29,34 +29,42 @@
       <div class="inner clearfix">
         <section id="main-content">
           <h1>
-<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Tabu Search</h1>
+<a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Simulated Annealing</h1>
 
-<p>Tabu search is an extension of hill climbing where a list is kept of the <i>k</i> most recently visited states, so that these states cannot be revisited. The <i>k</i> most recent states are kept in an object called the <i>tabu list</i>, which is usually implemented as a FIFO queue, with a maximum of <i>k</i> values allowed to be stored in it at a time.</p>
-<p>At first, the search works identically to hill climb, in that it looks at all neighbors and takes the steepest ascent route. However, whereas hill climbing will automatically stop when it reaches a local maximum, tabu search will examine neighbors and attempt to try out any neighbors that are not on the tabu list, <i>even if that means taking a step towards a lower fitness function</i>. For this reason, the search must always keep track of the best state reached so far in addition to the tabu list.</p>
-<p>Below is pseudocode that describes the algorithm in more detail:</p>
-<pre><code>$ // Return a state that is a local maximum
-$ function <b>tabu_search</b>(<i>problem, max_tabu_list_size</i>):
-$ &nbsp;&nbsp;&nbsp;&nbsp;<i>tabu_list</i> &#8592 initialize to empty list
-$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> &#8592 random starting point
+<p>Simulated annealing is a very popular technique for global optimization. The method was adapted from the Metropolis-Hastings algorithm. The inspiration for the algorithm was the process of annealing in materials science, whereby materials and heated and cooled in a controlled way in order to reduce defects.</p>
+
+<p> In simulated annealing, we start out with a an initial sate and then keep iterating, making small changes to the state each time. If the changes improve the objective function, then they are always accepted. If not, then we may <i>still</i> accept them with some probability. Typically, this process is repeated until a stopping condition is met.</p>
+
+<p> The acceptance probability function <code>P(e,e',T)</code> (where <i>e</i> and <i>e'</i> are the old and new energies respectively and <i>T</i> is the temperature) is usually defined as 1 if <i>e'</i> < <i>e</i> and <i>exp(-(e'-e)/T)</i> otherwise.</p>
+
+<p> Below is pseudocode for simulated annealing:</p>
+
+<pre><code>$ // Return a state that is an approximation of the global maximum
+$ function <b>simulated annealing</b>(<i>initial_state</i>, <i>init_temperature</i>):
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>best_state</i> &#8592 <i>initial_state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current_state</i> &#8592 <i>initial_state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>current_fitness</i> &#8592 fitness(<i>current_state</i>)
+$ &nbsp;&nbsp;&nbsp;&nbsp;<i>temperature</i> &#8592 <i>init_temperature</i>
 $ &nbsp;&nbsp;&nbsp;&nbsp;<b>loop do</b>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>neighbors</i> &#8592; all successors of the <i>current-state</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> fitness(max fitness state in <i>neighbors</i>) &ge; fitness(<i>best_solution</i>):
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>best_solution</i> &#8592; highest fitness state in <i>neighbors</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>k-best-neighbors</i> &#8592; <i>k</i> highest ranked states in <i>neighbors</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove any values of <i>k-best-neighbors</i> &isin; <i>tabu_list</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> len(<i>k-best-neighbors</i>) = 0:
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>return</b> <i>best_solution</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current-state</i> &#8592 highest fitness value in <i>k-best-neighbors</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Add <i>current-state</i> to <i>tabu_list</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>if</b> len(<i>tabu_list</i> > <i>max_tabu_list_size</i>):
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Remove oldest value from <i>tabu_list</i>
-$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check stopping condition. If met, return <i>best_solution</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Set <i>n</i> based on <i>temperature</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>proposal_state</i> &#8592 make_n_changes(<i>current_state</i>,<i>n</i>)
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>proposal_fitness</i> &#8592 fitness(<i>proposal_state</i>)
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If the new state is better than the current state, accept it
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>If</b> proposal_fitness > current_fitness:
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current_state</i> &#8592 <i>proposal_state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>If</b> <i>proposal_fitness</i> > fitness(<i>best_state</i>):
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>best_state</i> &#8592 <i>proposal_state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// If the new state is not better than the current state, 
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;// still accept with some probability
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<b>ElseIf</b> P(<i>current_fitness</i>, <i>proposal_fitness</i>, <i>temperature</i>) > random()):
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>current_state</i> &#8592 <i>proposal_state</i>
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>temperature</i> &#8592 Update(<i>temperature</i>)
+$ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Check stopping condition. If met, return <i>best_state</i>
 </code></pre>
-<p>Because tabu search climbs first climbs too the local maximum before making use of it's tabu list, it is guaranteed to get to a solution <i>at least</i> as optimal as what hill climbing would get to from the same starting point. Of course, it requires more computation than a simple hill climbing algorithm, but tabu search performs significantly better in many search landscapes. For example, imagine that you are searching the landscape below, and you randomly start where the red arrow points:</p>
-<img src="./images/tabu_search_example.png" border="1">
-<p>If you were using hill climbing, the algorithm would continue to climb, but then stop at point 1. With a tabu search, as long as the "bump" at the local minimum at point 1 is within your threshold (i.e. you can get over it in few enough steps that the algorithm doesn't stop), then when it reaches point 1, it will try out the downhill step to the right (it will not return to the left, since it was recently there, so a leftward step would lead to a point in the tabu list), and then soon find the uphill path so that it could continue on towards 2. This is a simplified example, but nonetheless one that illustrates the power of tabu search. Note that the algorithm will still have trouble getting out of steep local maxima since we limit the number of iterations that it could go without making improvements, in order so that the algorithm runs in a reasonable amount of time.</p> 
 
-<p>The <i>finch</i> implementation of tabu search has the following signature:</p>
+<p>fdsfdsafds</p> 
+
+<p>The <i>finch</i> implementation of simulated has the following signature:</p>
 <pre><code>func tabu_search(initial_solution []int, max_num_neighbors int, 
         tabu_list_max_size int, evaluate func([]int) float64, 
         get_neighbors func([]int) [][]int)
