@@ -51,3 +51,9 @@
 4/23 - Documentation and fixing up go code formatting
 
 4/24 - Fixed up a few typos on website
+
+4/28 - Started on simulated annealing 
+
+4/29 - continuing on simulated annealing
+
+4/30 - more simulated annealing
