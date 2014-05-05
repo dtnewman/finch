@@ -108,7 +108,7 @@ func genetic_algorithm(population_size int, evaluate func([]int) float64,
 	for {
 		// get all the neighbors for all beams and put them into next_generation_candidates
 		next_generation_candidates = make([][]int, 0)
-		for i := 0; i < num_beams; i++ {
+		for i := 0; i < population_size; i++ {
 			neighbors = get_neighbors(population[i])
 			for _, value := range neighbors {
 				next_generation_candidates = append(next_generation_candidates, value)
@@ -133,7 +133,7 @@ func genetic_algorithm(population_size int, evaluate func([]int) float64,
 		}
 
 		// Now fill up the next generation
-		for i := 0; i < num_beams; i++ {
+		for i := 0; i < population_size; i++ {
 			copy(population[i], next_generation_candidates[int(fitnesses[1][i])])
 		}
 
@@ -160,10 +160,7 @@ func main() {
 	fmt.Println("\nRUN ON TSP")
 	tsp_setup_data()
 	best_solution, highest_score := genetic_algorithm(50, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
-	fmt.Println("beam search results", best_solution, -highest_score)
-	plotTSP(best_solution, "tsp_beam_search.png")
-	best_solution, highest_score = stochastic_beam_search(50, 200, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
-	fmt.Println("stochastic beam search results", best_solution, -highest_score)
-	plotTSP(best_solution, "tsp_stochastic_beam_search.png")
+	fmt.Println("genetic algorithm results", best_solution, -highest_score)
+	plotTSP(best_solution, "tsp_ga.png")
 
 }
