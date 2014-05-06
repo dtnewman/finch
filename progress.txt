@@ -59,3 +59,7 @@
 4/30 - more simulated annealing plus documentation
 
 4/4 - Started on genetic algorithms
+
+4/5 - genetic algorithms
+
+4/6 - genetic algorithms

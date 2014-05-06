@@ -93,9 +93,24 @@ func qsort_2d(a_input [][]float64, idx int, ascend_or_desc string) [][]float64 {
 }
 
 
+/** Uses uniform crossover to create offspring from two parents */
+func crossover(parent1 []int, parent2 []int)([]int) {
+	var rand_num int
+	child := make([]int, len(parent1))
+	for i := 0; i < len(child) ; i++ {
+		rand_num = rand.Intn(2)
+		if (rand_num == 0) {
+			child[i] = parent1[i]
+		} else {
+			child[i] = parent2[i]
+		}
+	}
+	return child
+}
+
 func genetic_algorithm(population_size int, evaluate func([]int) float64,
-	create_random func() []int, get_neighbors func([]int) [][]int) ([]int, float64) {
-	// decalre variables
+	create_random func() []int, mutate func([]int) [][]int) ([]int, float64) {
+	// declare variables
 	var next_generation_candidates [][]int
 	var neighbors [][]int
 	var max_fitness float64 = math.Inf(-1)
@@ -151,16 +166,23 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	// run the problem on our "simple" function, where we try take an array of values and try to set them to
 	// values between 1 and 10, in order to maximize an objective function sum(x_i*i)
-	/*fmt.Println("\nRUN ON SIMPLE FUNCTION")
-	best_solution, highest_score := beam_search(5,simple_evaluation,simple_create_random_start,simple_get_neighbors)
-	fmt.Println("beam search results", best_solution, highest_score)
-	best_solution, highest_score = stochastic_beam_search(2,simple_evaluation,simple_create_random_start,simple_get_neighbors)
-	fmt.Println("stochastic beam search results", best_solution, highest_score)
-	*/
-	fmt.Println("\nRUN ON TSP")
-	tsp_setup_data()
-	best_solution, highest_score := genetic_algorithm(50, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
-	fmt.Println("genetic algorithm results", best_solution, -highest_score)
-	plotTSP(best_solution, "tsp_ga.png")
+	// fmt.Println("\nRUN ON SIMPLE FUNCTION")
+	// best_solution, highest_score := genetic_algorithm(5,simple_evaluation,simple_create_random_start,simple_get_neighbors)
+	// fmt.Println("genetic algorithm results", best_solution, highest_score)
+
+	
+	// fmt.Println("\nRUN ON TSP")
+	// tsp_setup_data()
+	// best_solution, highest_score = genetic_algorithm(50, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
+	// fmt.Println("genetic algorithm results", best_solution, -highest_score)
+	// plotTSP(best_solution, "tsp_ga.png")
+	for i := 0; i < 10; i++ {
+		fmt.Println(rand.Intn(2))
+	}
+
+	a := []int{1,2,3,4}
+	b := []int{5,6,7,8}
+	fmt.Println(a,b)
+	fmt.Println(crossover(a,b))
 
 }

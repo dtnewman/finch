@@ -14,49 +14,39 @@ import (
 	"strings"
 )
 
-/** return a random integer between min and max */
+/** return a random integer between (and including both) min and max */
 func random_int(min, max int) int {
-	return rand.Intn(max-min) + min
+	return rand.Intn(max+1-min) + min
 }
 
-/** get all neighbors of a given solution. Neighbors in this function
-are defined as all values where just one integer in the array is
-incremented or decremented by 1, and only where integer values remain
-between 1 and 10 */
-func simple_get_neighbors(currentSolution []int) [][]int {
+
+/** Take in a solution for the "simple" example and make one change to it */
+func simple_make_change(current_solution []int) []int {
 	minval := 1
 	maxval := 10
 
-	neighbors := make([][]int, 0)
-	temp := make([]int, len(currentSolution))
+	length := len(current_solution)
+	return_value := make([]int, len(current_solution))
+	copy(return_value, current_solution)
 
-	for i, value := range currentSolution {
-		if value > minval {
-			copy(temp, currentSolution)
-			temp[i] = value - 1
-			neighbors = append(neighbors, make([]int, len(currentSolution)))
-			copy(neighbors[len(neighbors)-1], temp)
-		}
-		if value < maxval {
-			copy(temp, currentSolution)
-			temp[i] = value + 1
-			neighbors = append(neighbors, make([]int, len(currentSolution)))
-			copy(neighbors[len(neighbors)-1], temp)
-		}
-	}
-	return neighbors
+	value_to_change := random_int(0,length-1)
+	return_value[value_to_change] = random_int(minval,maxval)
+
+	return return_value
 }
 
+/** evaluate a solution by adding together all elements in the array
+*	multiplied by those elements' positions */
 func simple_evaluation(a []int) (sum float64) {
 	for i := 0; i < len(a); i++ {
-		sum += float64(a[i]) //*(i+1))
+		sum += float64(a[i] * (i + 1))
 	}
 	return sum
 }
 
-/** return an array with 5 random integers between 1 and 10 */
+/** return an array with 6 random integers between 1 and 10 */
 func simple_create_random_start() []int {
-	size := 3
+	size := 6
 	random_start := make([]int, size)
 	for i := 0; i < len(random_start); i++ {
 		random_start[i] = random_int(1, 10)
@@ -64,22 +54,18 @@ func simple_create_random_start() []int {
 	return random_start
 }
 
-func tsp_get_neighbors(currentSolution []int) [][]int {
-	neighbors := make([][]int, 0)
-	temp_neighbor := make([]int, len(currentSolution))
-	var temp_int int
+/** Take in a solution for the TSP example and make one change to it */
+func tsp_make_change(current_solution []int) []int {
+	length := len(current_solution)
+	return_value := make([]int, len(current_solution))
+	copy(return_value, current_solution)
+	random_int_1 := random_int(0,length-1)
+	random_int_2 := random_int(0,length-1)
+	temp := return_value[random_int_1]
+	return_value[random_int_1] = return_value[random_int_2]
+	return_value[random_int_2] = temp
 
-	for i := 0; i < len(currentSolution); i++ {
-		for j := i + 1; j < len(currentSolution); j++ {
-			copy(temp_neighbor, currentSolution)
-			temp_int = temp_neighbor[i]
-			temp_neighbor[i] = temp_neighbor[j]
-			temp_neighbor[j] = temp_int
-			neighbors = append(neighbors, make([]int, len(currentSolution)))
-			copy(neighbors[len(neighbors)-1], temp_neighbor)
-		}
-	}
-	return neighbors
+	return return_value
 }
 
 var g_data [][]int

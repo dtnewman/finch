@@ -98,7 +98,7 @@ func qsort_2d(a_input [][]float64, idx int, ascend_or_desc string) [][]float64 {
 // improving at which point it stops and returns the best solution.
 func beam_search(num_beams int, evaluate func([]int) float64,
 	create_random func() []int, get_neighbors func([]int) [][]int) ([]int, float64) {
-	// decalre variables
+	// declare variables
 	var next_generation_candidates [][]int
 	var neighbors [][]int
 	var max_fitness float64 = math.Inf(-1)
