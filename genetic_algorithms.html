@@ -62,12 +62,14 @@ Let's go into a bit more depth on each of these processes.
 
 <img src="./images/swap_mutation.jpeg">
 
-<h3>Overall algorithm</h3>
+<h3>Additional notes</h3>
 
 <p>Generally, crossover is the main methodology used for improving solutions in genetic algorithms, with mutations used to keep the population pool diverse and to prevent getting stuck at local minima, although this is subject to debate since some implementations of the algorithm make heavier use of mutations.</p>
 
 <p>One issue with genetic algorithms is that the best solutions are usually lost in one generation to the next. To prevent this, sometimes an <b>elitism strategy</b> is used, where a specified number of the top solutions will always be cloned into the next generation without crossover or mutation. Of course, doing this often causes the population to become less diverse and therefore more likely to get stuck on local maxima, but a modest elitism strategy often leads to better overall solutions for many problems.</p> 
 
+<h3>Finch implementation</h3>
+<p>The <i>finch</i> implementation of genetic algorithms allows you to pass in crossover and mutation algorithms. It also allows you to specify population size and the number of elite individuals to pass from each generation to the next. The stopping condition on this algorithm happens when a user specified number of iterations have passed. </p>
 <p>The <i>finch</i> function for genetic algorithms has the following signature:</p>
 <pre><code>func genetic_algorithm(population_size int, evaluate func([]int) float64,
 	create_random func() []int , mutate func([]int, float64) []int,
