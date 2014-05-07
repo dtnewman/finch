@@ -31,7 +31,43 @@
           <h1>
 <a name="welcome-to-github-pages" class="anchor" href="#welcome-to-github-pages"><span class="octicon octicon-link"></span></a>Genetic Algorithms</h1>
 
-<p>Genetic algorithms</p>
+<p>Genetic algorithms are a form of local search that mimic&mdash;and are inspired by&mdash;the process of natural selection. The algorithm beings by generating a series of candidates in a population of size <i>n</i>. You can seed this population with pre-made candidates, but it is more common to just generate random candidates so that you cover a diverse range of options within the search space. The representation of each individual solution within the population is sometimes referred to as a "chromosome". The individual values of each chromosome are sometimes referred to as "genes".</p>
+
+<p>Once you have setup an initial population, you iterate the algorithm until a stopping condition is met. At each iteration, you generate <i>n</i> "children" to fill the next generation. Children are generated through a two part process:</p>
+<ol>
+	<li><b>Crossover</b>- The process of taking two parent chromosomes and combining them together to produce a child</li>
+	<li><b>Mutation</b>- The child generated through crossover is randomly perturbed to generate a "mutated" individual</li>
+</ol>
+
+Let's go into a bit more depth on each of these processes. 
+
+<h3>Crossover</h3>
+<p>There are several variants of crossover (also known as <i>recombination</i>), but they all involve mixing two parent chromosomes together to generate offspring. Typically, these parents are selected probabilistically from the population, with higher fitness individuals in the population having a higher chance of being selected to breed each child. High fitness individuals are likely to have multiple children in the next generation, while low fitness individuals may not get a chance to breed at all. In the <i>finch</i> implementation of this algorithm, individuals are selected with a probability based on their position in an ordered pool, not based on actual fitness values.</p> 
+
+<p>In <b>one-point crossover</b>, a single spot is randomly picked to slice both parent chromosomes. The child is then generated using one side of the slice from the first parent and the other side of the slice from the second parent. The figure below shows an example of this:</p>
+
+<img src="./images/crossover1.jpeg">
+
+<p>In <b>uniform crossover</b>, you go through each chromosome and then randomly select from each of the parents for each individual gene. The figure below shows this process:</p>
+
+<img src="./images/crossover2.jpeg">
+
+<p>Occasionally, problems are represented in ways that makes crossover a difficult process. For example, if you are optimizing the travelling salesman problem, then your representation of a chromosome might be an ordering of cities to visit. In this case, <b>ordered crossover</b> is necessary. In this process, we select a subset from the first parent and add that subset to our child. Then, we add genes that are not yet in the child using the second parent's order. The figure below shows this two step process:</p>
+
+<img src="./images/crossover3.jpeg">
+
+<h3>Mutation</h3>
+
+<p>In the most commonly used mutatation algorithm, each gene in the child is iterated through. At each iteration, a random number <i>r</i> (0 < <i>r</i> < 1.0) is generated and if <i>r</i> is less than the user provided <b>mutation rate</b>, then that gene is randomly changed to another valid value. As with crossover, you might have cases such as the travelling salesman problem where each gene must be unique. If that is the case, then <b>swap mutation</b> can be used, whereby two genes are simply switched with each other, as in the figure below: </p> 
+
+<img src="./images/swap_mutation.jpeg">
+
+<h3>Overall algorithm</h3>
+
+<p>Generally, crossover is the main methodology used for improving solutions in genetic algorithms, with mutations used to keep the population pool diverse and to prevent getting stuck at local minima, although this is subject to debate since some implementations of the algorithm make heavier use of mutations.</p>
+
+<p>One issue with genetic algorithms is that the best solutions are usually lost in one generation to the next. To prevent this, sometimes an <b>elitism strategy</b> is used, where a specified number of the top solutions will always be cloned into the next generation without crossover or mutation. Of course, doing this often causes the population to become less diverse and therefore more likely to get stuck on local maxima, but a modest elitism strategy often leads to better overall solutions for many problems.</p> 
+
 <p>The <i>finch</i> function for genetic algorithms has the following signature:</p>
 <pre><code>func genetic_algorithm(population_size int, evaluate func([]int) float64,
 	create_random func() []int , mutate func([]int, float64) []int,
