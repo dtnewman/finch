@@ -74,7 +74,7 @@ $ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>max_value</i> &#8592; fitne
 
 <img src="./images/stochastic_beam_search_formula.png">
 
-<p>The algorithm also uses an <i>elitism strategy</i> whereby the top member of each generation always gets passed to the next with 100% probability. Finally, unlike standard beam search, the <i>finch</i> implementation of stochastic beam search has a stopping condition that it must show no improvement for a user determined number of iterations before it terminates. Occassionally, the algorithm will go a few iterations without improving, before selecting a better neighbor and then continuing to climb higher. By adding this feature, it helps the algorithm escape local maxima. The functions signature is as follows:</p>
+<p>The algorithm also uses an <i>elitism strategy</i> whereby the top member of each generation always gets passed to the next with 100% probability. Finally, unlike standard beam search, the <i>finch</i> implementation of stochastic beam search has a stopping condition that it must show no improvement for a user determined number of iterations before it terminates. Occassionally, the algorithm will go a few iterations without improving, before selecting a better neighbor and then continuing to climb higher. By adding this feature, it helps the algorithm escape local maxima. The function's signature is as follows:</p>
 <pre><code>func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, 
         evaluate func([]int) float64, create_random func() []int, 
         get_neighbors func([]int)
