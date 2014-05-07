@@ -209,7 +209,8 @@ func stochastic_beam_search(num_beams int, max_iterations_no_improvement int, ev
 			break
 		}
 
-		// we're gonna pick based on order, with items first getting higher probability. First
+		// we're gonna pick based on order, with items first getting higher probability. First, let's
+		// get selection probabilities for each beam
 		sum_fitnesses = float64(len(fitnesses[0])*(len(fitnesses[0])+1)) / 2.0
 
 		selection_probability := make([]float64, len(fitnesses[0]))

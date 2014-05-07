@@ -46,12 +46,43 @@ func simple_evaluation(a []int) (sum float64) {
 
 /** return an array with 6 random integers between 1 and 10 */
 func simple_create_random_start() []int {
-	size := 6
+	size := 10
 	random_start := make([]int, size)
 	for i := 0; i < len(random_start); i++ {
 		random_start[i] = random_int(1, 10)
 	}
 	return random_start
+}
+
+/** a mutation function that takes in an individual, and mutates it according
+/*  to the given mutation_rate */
+func simple_mutate(input_individual []int, mutation_rate float64)([]int) {
+	output_individual := make([]int, len(input_individual))
+	var rand_num float64
+	for i := 0; i < len(input_individual); i++ {
+		rand_num = rand.Float64()
+		if (rand_num < mutation_rate) {
+			output_individual[i] = random_int(1,10)
+		} else {
+			output_individual[i] = input_individual[i]
+		}
+	}
+	return output_individual
+}
+
+/** Uses uniform crossover to create offspring from two parents */
+func simple_crossover(parent1 []int, parent2 []int)([]int) {
+	var rand_num int
+	child := make([]int, len(parent1))
+	for i := 0; i < len(child) ; i++ {
+		rand_num = rand.Intn(2)
+		if (rand_num == 0) {
+			child[i] = parent1[i]
+		} else {
+			child[i] = parent2[i]
+		}
+	}
+	return child
 }
 
 /** Take in a solution for the TSP example and make one change to it */
@@ -66,6 +97,72 @@ func tsp_make_change(current_solution []int) []int {
 	return_value[random_int_2] = temp
 
 	return return_value
+}
+
+/** a mutation function that takes in an individual, and mutates it according
+/*  to the given mutation_rate */
+func tsp_mutate(input_individual []int, mutation_rate float64)([]int) {
+	output_individual := make([]int, len(input_individual))
+	copy(output_individual,input_individual)
+	var rand_num float64
+	for i := 0; i < len(input_individual); i++ {
+		rand_num = rand.Float64()
+		if (rand_num < mutation_rate) {
+			output_individual = tsp_make_change(output_individual)
+		} 
+	}
+	return output_individual
+}
+
+func intInSlice(a int, list []int) bool {
+    for _, b := range list {
+        if b == a {
+            return true
+        }
+    }
+    return false
+}
+
+
+/** Uses crossover to create offspring from two parents */
+func tsp_crossover(parent1 []int, parent2 []int)([]int) {
+	
+	// create an empty slice to hold the child
+	child := make([]int,len(parent1))
+
+	for i := 0; i < len(child); i++ {
+		child[i] = -1
+	}
+	
+	// pick a starting point and ending point from parent 1
+	start := random_int(0,len(parent1)-1)
+	end := random_int(0,len(parent1)-1)
+
+	// switch them if end < start
+	if (end < start) {
+		temp := end
+		end = start
+		start = temp
+	}
+
+	// set the elements from start to end in child to those elements in parent1
+	for i := start; i <= end; i++ {
+		child[i] = parent1[i]
+	}
+
+	// now add objects not in the child currently to the child in the second
+	// parent's order
+	position := 0
+	for i := 0; i < len(child); i++{
+		if (i < start || i > end) {
+			for (intInSlice(parent2[position],child)) {
+				position += 1
+			}
+			child[i] = parent2[position]
+			position += 1
+		}
+	}
+	return child
 }
 
 var g_data [][]int

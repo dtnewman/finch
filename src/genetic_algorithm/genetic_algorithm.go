@@ -93,71 +93,111 @@ func qsort_2d(a_input [][]float64, idx int, ascend_or_desc string) [][]float64 {
 }
 
 
-/** Uses uniform crossover to create offspring from two parents */
-func crossover(parent1 []int, parent2 []int)([]int) {
-	var rand_num int
-	child := make([]int, len(parent1))
-	for i := 0; i < len(child) ; i++ {
-		rand_num = rand.Intn(2)
-		if (rand_num == 0) {
-			child[i] = parent1[i]
-		} else {
-			child[i] = parent2[i]
-		}
-	}
-	return child
-}
 
+
+
+/** Genetic algorithm implementation */
 func genetic_algorithm(population_size int, evaluate func([]int) float64,
-	create_random func() []int, mutate func([]int) [][]int) ([]int, float64) {
+	create_random func() []int , mutate func([]int, float64) []int,
+	crossover func([]int,[]int) []int, 	mutation_rate float64, num_iterations int,
+	num_elite int) ([]int, float64) {
 	// declare variables
-	var next_generation_candidates [][]int
-	var neighbors [][]int
 	var max_fitness float64 = math.Inf(-1)
+	
+	var sum_fitnesses float64
+	var cum_probability float64
+	var rand_float float64
+
 
 	// create a population of population_size random starting points
 	population := make([][]int, 0)
+	
+	// create a 2d array that holds fitnesses in the first row and numbers identifying which
+	// individual in population that each fitness refers to
+	fitnesses := make([][]float64, 0)
+	fitnesses = append(fitnesses, make([]float64, population_size))
+	fitnesses = append(fitnesses, make([]float64, population_size))
+
+	// create a starting population
 	for i := 0; i < population_size; i++ {
 		population = append(population, create_random())
 	}
-	for {
-		// get all the neighbors for all beams and put them into next_generation_candidates
-		next_generation_candidates = make([][]int, 0)
+
+	// create a variable to hold the best individual
+	best_individual := make([]int, len(population[0]))
+
+	// create variables to hold chromosomes for parents 
+	parent1 := make([]int, len(population[0]))
+	parent2 := make([]int, len(population[0]))
+
+	// cycle through the problem for num_iterations
+	for iter := 0; iter < num_iterations; iter++ {
+		// start out with a cleared next generation
+		next_generation_population := make([][]int, 0)
+
 		for i := 0; i < population_size; i++ {
-			neighbors = get_neighbors(population[i])
-			for _, value := range neighbors {
-				next_generation_candidates = append(next_generation_candidates, value)
-			}
-		}
-
-		// evaluate all the solutions and store values in fitness array
-		fitnesses := make([][]float64, 0)
-		fitnesses = append(fitnesses, make([]float64, len(next_generation_candidates)))
-		fitnesses = append(fitnesses, make([]float64, len(next_generation_candidates)))
-
-		for i, _ := range fitnesses[0] {
-			fitnesses[0][i] = evaluate(next_generation_candidates[i])
+			fitnesses[0][i] = evaluate(population[i])
 			fitnesses[1][i] = float64(i)
 		}
-
+		
 		// sort the fitness array by value in the first row, which holds fitness scores
 		fitnesses = qsort_2d(fitnesses, 0, "descending")
-		// Stop the loop if the highest fitness is not greater than max_fitness
-		if fitnesses[0][0] <= max_fitness {
-			break
+		
+		// update best solution
+		if (fitnesses[0][0] > max_fitness) {
+			max_fitness = fitnesses[0][0]
+			copy(best_individual,population[int(fitnesses[1][0])])
+		}
+		
+		// move the elite solutions to the next generation
+		for i := 0; i < num_elite; i++ {
+			next_generation_population = append(next_generation_population,population[int(fitnesses[1][i])])
 		}
 
-		// Now fill up the next generation
+
+		// we're gonna pick based on order, with items first getting higher probability. First, let's get
+		// selection probabilities for each individual in the population
+		sum_fitnesses = float64(len(fitnesses[0])*(len(fitnesses[0])+1)) / 2.0
+
+		selection_probability := make([]float64, len(fitnesses[0]))
+		cum_probability = 0.0
+
+		for i, _ := range fitnesses[0] {
+			selection_probability[i] = cum_probability + float64(len(fitnesses[0])-i)/sum_fitnesses
+			cum_probability += float64(len(fitnesses[0])-i) / sum_fitnesses
+		}
+
+		// now fill in the rest of the population with breeding
+		for i := num_elite; i < population_size; i++{
+			// pick the parents
+			rand_float = rand.Float64()
+			j := 0
+			for j = 0; selection_probability[j] < rand_float; j++ {
+			}
+			parent1 = population[int(fitnesses[1][j])]
+			rand_float = rand.Float64()
+			j = 0
+			for j = 0; selection_probability[j] < rand_float; j++ {
+			}
+			parent2 = population[int(fitnesses[1][j])]
+		
+
+			// generate a child with crossover breeding
+			child := crossover(parent1,parent2)
+			
+			// mutate the child
+			child = mutate(child, mutation_rate)
+			next_generation_population = append(next_generation_population,child)
+
+		}
+
+		// copy the next generation into the population variable
 		for i := 0; i < population_size; i++ {
-			copy(population[i], next_generation_candidates[int(fitnesses[1][i])])
+			copy(population[i], next_generation_population[i])
 		}
-
-		// Set max_fitness to (-1) times the first element in the first row of fitnesses
-		// since that indicates the leading value
-		max_fitness = fitnesses[0][0]
 	}
 
-	return population[0], max_fitness
+	return best_individual, max_fitness
 }
 
 
@@ -166,23 +206,15 @@ func main() {
 	rand.Seed(time.Now().Unix())
 	// run the problem on our "simple" function, where we try take an array of values and try to set them to
 	// values between 1 and 10, in order to maximize an objective function sum(x_i*i)
-	// fmt.Println("\nRUN ON SIMPLE FUNCTION")
-	// best_solution, highest_score := genetic_algorithm(5,simple_evaluation,simple_create_random_start,simple_get_neighbors)
-	// fmt.Println("genetic algorithm results", best_solution, highest_score)
+	fmt.Println("\nRUN ON SIMPLE FUNCTION")
+	best_solution, highest_score := genetic_algorithm(10,simple_evaluation,simple_create_random_start,simple_mutate,simple_crossover,0.1,1000,1)
+	fmt.Println("genetic algorithm results", best_solution, highest_score)
 
 	
-	// fmt.Println("\nRUN ON TSP")
-	// tsp_setup_data()
-	// best_solution, highest_score = genetic_algorithm(50, tsp_evaluation, tsp_create_random_start, tsp_get_neighbors)
-	// fmt.Println("genetic algorithm results", best_solution, -highest_score)
-	// plotTSP(best_solution, "tsp_ga.png")
-	for i := 0; i < 10; i++ {
-		fmt.Println(rand.Intn(2))
-	}
+	fmt.Println("\nRUN ON TSP")
 
-	a := []int{1,2,3,4}
-	b := []int{5,6,7,8}
-	fmt.Println(a,b)
-	fmt.Println(crossover(a,b))
-
+	tsp_setup_data()
+	best_solution, highest_score = genetic_algorithm(5, tsp_evaluation, tsp_create_random_start, tsp_mutate,tsp_crossover,0.02,10000,2)
+	fmt.Println("genetic algorithm results", best_solution, -highest_score)
+	plotTSP(best_solution, "tsp_ga.png")
 }
