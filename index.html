@@ -30,7 +30,24 @@
         <section id="main-content">
           <h3>Introduction</h3>
 
-<p>Welcome to the site for <i>finch</i>, a library for local search in Go. This site and the associated library are currently under construction, so please pardon any dead links, bugs, mizpellings and pretty much anything else that you'd associate with a project still in the works.</p>
+<p>Welcome to the site for <i>finch</i>, a library for local search and stochastic optimization in Go. The following algorithms have been implemented in this project:</p>
+<ul>
+  <li>Hill climbing (steepest ascent, random-restart and Stochastic </li>
+  <li>Beam Search (standard and stochastic)</li>
+  <li>Tabu search (standard and stochastic)
+  <li>Simulated annealing</li>
+  <li>Genetic algorithms</li>
+</ul>
+
+<p>Click the links on the right for more information on the individual algorithms. The code for this project is all open source and can be found on this project's <a href="https://github.com/dtnewman/finch">GitHub page</a>.</p>
+
+<h3>Using Finch</h3>
+
+<p>Finch was designed for use with Go 1.2. Some of the examples also use the <a href="https://code.google.com/p/plotinum/">Plotinum</a> library for producing plots of the output. All of the functions were built to be as general as possible, so that they are useful for a wide variety of problems. In order to allow for this flexibility, the functions are built so that certain sub-functions must be passed in as parameters. On the <a href="./examples.html">examples</a> page, there are some basic examples of sub-functions to be passed in to the main optimization functions that can be easily modified for a wide range of problems.</p>
+
+<h3>Modifying the code</h3>
+
+<p>The code is subject to the <a href="http://opensource.org/licenses/MIT">MIT License</a>, a copy of which can be found in the GitHub repository. Please feel free to use or modify the code subject to the terms of the license. And please reach out if you have any suggestions for improvements.</p>
 
         </section>
 
@@ -49,7 +66,10 @@
           </a>          
           <a href="./genetic_algorithms.html" class="button">
             Genetic algorithms
-          </a>       
+          </a>
+		  <a href="./examples.html" class="button">
+            Examples
+          </a>      
 
           <p class="repo-owner"><a href="https://github.com/dtnewman/finch"></a>This website is maintained by <a href="https://github.com/dtnewman">dtnewman</a>.</p>
 

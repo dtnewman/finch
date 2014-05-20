@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link href='https://fonts.googleapis.com/css?family=Architects+Daughter' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/pygment_trac.css" media="screen" />
+    <link rel="stylesheet" type="text/css" href="stylesheets/print.css" media="print" />
+    <link rel="shortcut icon" href="./images/logo.ico">
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+
+    <title>Finch by dtnewman</title>
+  </head>
+
+  <body>
+    <header>
+      <div class="inner">
+        <a href="./index.html"><img src="./images/logo.png"  width="300" height="150"></a>
+        <h2>A library for local search and stochastic optimization in Go.</h2>
+        <a href="https://github.com/dtnewman/finch" class="button"><small>View project on</small>GitHub</a>
+      </div>
+    </header>
+
+    <div id="content-wrapper">
+      <div class="inner clearfix">
+        <section id="main-content">
+          <h1>Examples</h1>
+
+<p>Below are some examples of the functions that might be used to pass in to the parameters of the optimization functions. There are two basic frameworks provided as examples. The first framework is an example of a very simple objective function to be maximized:</p>
+
+<img src="./images/Obj_func_simple.gif">
+<br><br>
+<p>This objective function simply sums up the values of values of x for i = 1,2,...,n. With no additional constraints given, the optimal solution is where all decision variables are set to 10. This is a trivial problem to solve, but nonetheless a useful example for how to use this library.</p>
+
+<p>The second set of example functions will be for the travelling salesman problem (TSP), which asks the following question: Given a list of cities as well as distances between each pair of cities, what is the shortest route that visits each city once and only once and then returns to the origin city? This is a classic NP-complete optimization problem that is often used for testing optimization algorithms.</p>
+
+<h2>The simple example</h2>
+
+As stated previously, the objective function for the "simple example" simply returns the sum of all the values in a passed in array. Below is an example of this fitness function:
+
+<pre><code>
+func simple_evaluation(a []int) (sum float64) {
+	for i := 0; i < len(a); i++ {
+		sum += float64(a[i])
+	}
+	return sum
+}
+</code></pre>
+
+This code can be passed in as the "evaluate" parameter on all of the algorithms developed in <i>finch</i>. The hill climbing, beam search and tabu search algorithms require a function for generating neighbors of the current state. The following function takes in the current state and returns all neighbors of that state for the "simple" example problem:
+
+<pre><code>
+func simple_get_neighbors(current_state []int) [][]int {
+	minval := 1
+	maxval := 10
+
+	neighbors := make([][]int, 0)
+	temp := make([]int, len(current_state))
+
+	for i, value := range current_state {
+		if value > minval {
+		  copy(temp, current_state)
+		  temp[i] = value - 1
+		  neighbors = append(neighbors, make([]int, len(current_state)))
+		  copy(neighbors[len(neighbors)-1], temp)
+		}
+		if value < maxval {
+		  copy(temp, current_state)
+		  temp[i] = value + 1
+		  neighbors = append(neighbors, make([]int, len(current_state)))
+		  copy(neighbors[len(neighbors)-1], temp)
+		}
+	}
+	return neighbors
+}
+</code></pre>
+
+The following is a function for creating a random starting point for those algorithms that require this:
+
+<pre><code>
+func simple_create_random_start() []int {
+	size := 6
+	random_start := make([]int, size)
+	for i := 0; i < len(random_start); i++ {
+		random_start[i] = random_int(1,10)
+	}
+	return random_start
+}
+</code></pre>
+
+<p>This function calls the <i>random_int</i> function, which is defined as follows:</p>
+<pre><code>
+func random_int(min, max int) int {
+	return rand.Intn(max+1-min) + min
+}
+</code></pre>
+
+<p>The genetic algorithms requires you to pass in functions for mutations and crossover. Below are samples of such functions for this problem:</p>
+<pre><code>
+func simple_mutate(input_individual []int, mutation_rate float64)([]int) {
+	output_individual := make([]int, len(input_individual))
+	var rand_num float64
+	for i := 0; i < len(input_individual); i++ {
+		rand_num = rand.Float64()
+		if (rand_num < mutation_rate) {
+			output_individual[i] = random_int(1,10)
+		} else {
+			output_individual[i] = input_individual[i]
+		}
+	}
+	return output_individual
+}
+
+func simple_crossover(parent1 []int, parent2 []int)([]int) {
+	var rand_num int
+	child := make([]int, len(parent1))
+	for i := 0; i < len(child) ; i++ {
+		rand_num = rand.Intn(2)
+		if (rand_num == 0) {
+			child[i] = parent1[i]
+		} else {
+			child[i] = parent2[i]
+		}
+	}
+	return child
+}
+</code></pre>
+
+Using these functions, here are some examples of how you might call the various algorithms to run them for the "simple" example:
+<pre><code>
+// Hill climbing
+p := []int{2, 3, 5, 4, 1, 6}
+best_solution, highest_score := hill_climb(p, simple_evaluation, simple_get_neighbors)
+
+// Beam search
+best_solution, highest_score := beam_search(50, simple_evaluation, simple_create_random_start, simple_get_neighbors)
+
+// Tabu search
+p := []int{2, 3, 5, 4, 1, 6}
+best_solution, highest_score = tabu_search(p, 4, 2, simple_evaluation, simple_get_neighbors)
+
+// Simulated annealing
+p := []int{2, 3, 5, 4, 1, 6}
+best_solution, highest_score := simulated_annealing(p, simple_evaluation, simple_make_change, 10, 0.9, 1000, 10)
+
+// Genetic algorithm
+best_solution, highest_score := genetic_algorithm(10,simple_evaluation,simple_create_random_start,simple_mutate,simple_crossover,0.1,1000,1)
+</code></pre>
+
+<h2>Travelling salesman problem example</h2>
+
+<p>As stated previously, the travelling salesman problem (TSP) aims to find the shortest path that visits each city in a group once and only once, and then returns to the starting city. The file located <a href="./misc/tsp_data.csv">here</a> contains the Berlin52 dataset, which is a commonly used dataset for testing the TSP problem. Below are the various functions that can be used to run the algorithms on the TSP. These functions are used in the same manor as the corresponding functions in the "simple" example:</p>
+
+<pre><code>
+// Given a candidate solution, find the total distance travelled
+func tsp_evaluation(path []int) (sum float64) {
+	for i := 0; i < len(path); i++ {
+		sum -= norm(g_data[path[i]][0], g_data[path[i]][1], g_data[path[(i+1)%len(path)]][0], g_data[path[(i+1)%len(path)]][1])
+	}
+	return sum
+}
+
+// Create a random starting solution
+func tsp_create_random_start() []int {
+	size := len(g_data)
+	return rand.Perm(size)
+}
+
+// Make a single change to the candidate solution by swapping two cities
+func tsp_make_change(current_solution []int) []int {
+	length := len(current_solution)
+	return_value := make([]int, len(current_solution))
+	copy(return_value, current_solution)
+	random_int_1 := random_int(0,length-1)
+	random_int_2 := random_int(0,length-1)
+	temp := return_value[random_int_1]
+	return_value[random_int_1] = return_value[random_int_2]
+	return_value[random_int_2] = temp
+
+	return return_value
+}
+
+// The mutation function for the genetic algorithm
+func tsp_mutate(input_individual []int, mutation_rate float64)([]int) {
+	output_individual := make([]int, len(input_individual))
+	copy(output_individual,input_individual)
+	var rand_num float64
+	for i := 0; i < len(input_individual); i++ {
+		rand_num = rand.Float64()
+		if (rand_num < mutation_rate) {
+			output_individual = tsp_make_change(output_individual)
+		} 
+	}
+	return output_individual
+}
+
+// The crossover function for the genetic algorithm
+func tsp_crossover(parent1 []int, parent2 []int)([]int) {
+	
+	// create an empty slice to hold the child
+	child := make([]int,len(parent1))
+
+	for i := 0; i < len(child); i++ {
+		child[i] = -1
+	}
+	
+	// pick a starting point and ending point from parent 1
+	start := random_int(0,len(parent1)-1)
+	end := random_int(0,len(parent1)-1)
+
+	// switch them if end < start
+	if (end < start) {
+		temp := end
+		end = start
+		start = temp
+	}
+
+	// set the elements from start to end in child to those elements in parent1
+	for i := start; i <= end; i++ {
+		child[i] = parent1[i]
+	}
+
+	// now add objects not in the child currently to the child in the second
+	// parent's order
+	position := 0
+	for i := 0; i < len(child); i++{
+		if (i < start || i > end) {
+			for (intInSlice(parent2[position],child)) {
+				position += 1
+			}
+			child[i] = parent2[position]
+			position += 1
+		}
+	}
+	return child
+}
+</code></pre>
+
+<p>The following supporting function is called by the <i>tsp_evaluation</i> function to find the distance between two cities: 
+<pre><code>
+func norm(x1 int, y1 int, x2 int, y2 int) float64 {
+	return math.Sqrt(float64(x1-x2)*float64(x1-x2) + float64(y1-y2)*float64(y1-y2))
+}
+</code></pre>
+
+<p>This function is called by the TSP crossover function for genetic algorithms to check if a slice already contains a given value:</p>
+<pre><code>
+func intInSlice(a int, list []int) bool {
+    for _, b := range list {
+        if b == a {
+            return true
+        }
+    }
+    return false
+}
+</code></pre>
+
+<p>Finally, you may have noticed a variable <i>g_data</i> that was called by several of the functions above. This is a global variable that contains the data for the cities in the TSP problem. This variable should be initialized before running any of the algorithms by calling the <i>tsp_setup_data</i> function below:</p>
+<pre><code>
+var g_data [][]int
+
+func tsp_setup_data() {
+	file, err := os.Open("tsp_data.csv")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return
+	}
+	defer file.Close()
+	reader := csv.NewReader(file)
+	for {
+		record, err := reader.Read()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			fmt.Println("Error:", err)
+			return
+		}
+		g_data = append(g_data, make([]int, 2))
+		//g_data[len(g_data)-1][0] =
+		value1, err := strconv.Atoi(strings.TrimSpace(record[0]))
+		value2, err := strconv.Atoi(strings.TrimSpace(record[1]))
+		g_data[len(g_data)-1][0] = value1
+		g_data[len(g_data)-1][1] = value2
+	}
+}
+</code></pre>
+
+        </section>
+
+        <aside id="sidebar">
+          <a href="./hill_climb.html" class="button">
+            Hill climbing
+          </a>
+          <a href="./beam_search.html" class="button">
+            Beam search
+          </a>
+          <a href="./tabu_search.html" class="button">
+            Tabu search
+          </a>
+          <a href="./simulated_annealing.html" class="button">
+            Simulated annealing
+          </a>          
+          <a href="./genetic_algorithms.html" class="button">
+            Genetic algorithms
+          </a>
+		  <a href="./examples.html" class="button">
+            Examples
+          </a>      
+
+          <p class="repo-owner"><a href="https://github.com/dtnewman/finch"></a>This website is maintained by <a href="https://github.com/dtnewman">dtnewman</a>.</p>
+
+          <!--<p>This page was generated by <a href="https://pages.github.com">GitHub Pages</a> using the Architect theme by <a href="https://twitter.com/jasonlong">Jason Long</a>.</p>-->
+        </aside>
+      </div>
+    </div>
+
+  
+  </body>
+</html>
